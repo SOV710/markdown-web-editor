@@ -14,6 +14,9 @@ importers:
       '@tiptap/extension-placeholder':
         specifier: ^3.20.1
         version: 3.20.1(@tiptap/extensions@3.20.1(@tiptap/core@3.20.1(@tiptap/pm@3.20.1))(@tiptap/pm@3.20.1))
+      '@tiptap/extension-underline':
+        specifier: ^3.20.1
+        version: 3.20.1(@tiptap/core@3.20.1(@tiptap/pm@3.20.1))
       '@tiptap/pm':
         specifier: ^3.20.1
         version: 3.20.1

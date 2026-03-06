@@ -76,6 +76,13 @@ export function Toolbar({ editor }: ToolbarProps) {
         I
       </ToolbarBtn>
       <ToolbarBtn
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        active={editor.isActive("underline")}
+        title="Underline (Ctrl+U)"
+      >
+        <span style={{ textDecoration: "underline" }}>U</span>
+      </ToolbarBtn>
+      <ToolbarBtn
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive("strike")}
         title="Strikethrough (Ctrl+Shift+S)"

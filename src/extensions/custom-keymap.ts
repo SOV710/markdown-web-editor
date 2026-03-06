@@ -24,6 +24,8 @@ export const CustomKeymap = Extension.create({
         this.editor.chain().focus().toggleHeading({ level: 3 }).run(),
       "Mod-Alt-0": () =>
         this.editor.chain().focus().setParagraph().run(),
+      "Mod-u": () =>
+        this.editor.chain().focus().toggleUnderline().run(),
     };
   },
 });

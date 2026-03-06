@@ -1,7 +1,7 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { CustomKeymap } from "@/extensions";
+import { CustomKeymap, Underline } from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
   /** 初始内容 (HTML string) */
@@ -34,16 +34,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       }),
       Placeholder.configure({ placeholder }),
       CustomKeymap,
-      /*
-       * ── 扩展占位 ──
-       * 在此处按需添加：
-       * Underline,
-       * Table.configure({ resizable: true }),
-       * TaskList,
-       * TaskItem.configure({ nested: true }),
-       * Mathematics,
-       * ... 自定义 NodeView 扩展
-       */
+      Underline,
     ],
     content,
     onUpdate: ({ editor: e }) => {
