@@ -13,6 +13,8 @@ import {
   TableHeader,
   TableCell,
   CodeBlockLowlight,
+  MathInline,
+  MathBlock,
 } from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
@@ -54,6 +56,8 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       TableHeader,
       TableCell,
       CodeBlockLowlight,
+      MathInline,
+      MathBlock,
     ],
     content,
     onUpdate: ({ editor: e }) => {

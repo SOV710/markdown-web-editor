@@ -6,6 +6,7 @@ import { TableMenu } from "./TableMenu";
 import styles from "./Editor.module.css";
 import "@/styles/editor.css";
 import "@/styles/hljs.css";
+import "@/styles/katex.css";
 
 export interface EditorProps extends UseMarkdownEditorOptions {
   className?: string;
