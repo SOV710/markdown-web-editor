@@ -30,6 +30,17 @@ function Divider() {
   return <span className={styles.divider} />;
 }
 
+function handleLinkClick(editor: Editor) {
+  if (editor.isActive("link")) {
+    editor.chain().focus().unsetLink().run();
+  } else {
+    const url = window.prompt("URL:");
+    if (url) {
+      editor.chain().focus().setLink({ href: url }).run();
+    }
+  }
+}
+
 export function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null;
 
@@ -95,6 +106,13 @@ export function Toolbar({ editor }: ToolbarProps) {
         title="Inline code (Ctrl+E)"
       >
         {"<>"}
+      </ToolbarBtn>
+      <ToolbarBtn
+        onClick={() => handleLinkClick(editor)}
+        active={editor.isActive("link")}
+        title="Link"
+      >
+        {"🔗"}
       </ToolbarBtn>
 
       <Divider />

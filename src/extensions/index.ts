@@ -1,6 +1,7 @@
 export { CustomKeymap } from "./custom-keymap";
 export { Underline } from "./underline";
 export { TaskList, TaskItem } from "./task-list";
+export { Link } from "./link";
 
 /*
  * 后续扩展在此统一导出，例如：
