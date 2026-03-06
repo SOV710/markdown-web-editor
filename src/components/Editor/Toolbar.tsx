@@ -115,6 +115,13 @@ export function Toolbar({ editor }: ToolbarProps) {
         1.
       </ToolbarBtn>
       <ToolbarBtn
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        active={editor.isActive("taskList")}
+        title="Task list"
+      >
+        {"[ ]"}
+      </ToolbarBtn>
+      <ToolbarBtn
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         active={editor.isActive("blockquote")}
         title="Blockquote"
