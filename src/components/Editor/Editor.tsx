@@ -5,6 +5,7 @@ import { Toolbar } from "./Toolbar";
 import { TableMenu } from "./TableMenu";
 import styles from "./Editor.module.css";
 import "@/styles/editor.css";
+import "@/styles/hljs.css";
 
 export interface EditorProps extends UseMarkdownEditorOptions {
   className?: string;

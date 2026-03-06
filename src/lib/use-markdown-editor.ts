@@ -12,6 +12,7 @@ import {
   TableRow,
   TableHeader,
   TableCell,
+  CodeBlockLowlight,
 } from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
@@ -39,9 +40,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
-        codeBlock: {
-          // 后续可替换为 lowlight 高亮版本
-        },
+        codeBlock: false,
       }),
       Placeholder.configure({ placeholder }),
       CustomKeymap,
@@ -54,6 +53,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       TableRow,
       TableHeader,
       TableCell,
+      CodeBlockLowlight,
     ],
     content,
     onUpdate: ({ editor: e }) => {
