@@ -210,3 +210,54 @@
   float: left;
   height: 0;
 }
+
+/* ── PlantUML Block ── */
+.tiptap .plantuml-block {
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.tiptap .plantuml-block-input {
+  width: 100%;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.tiptap .plantuml-block-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.tiptap .plantuml-block-preview {
+  padding: var(--space-3);
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiptap .plantuml-block-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.tiptap .plantuml-error {
+  color: #d73a49;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: var(--space-1) var(--space-2);
+  background: #ffeef0;
+  border-radius: var(--radius-sm);
+}

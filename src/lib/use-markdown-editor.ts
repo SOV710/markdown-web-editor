@@ -15,6 +15,7 @@ import {
   CodeBlockLowlight,
   MathInline,
   MathBlock,
+  PlantUMLBlock,
 } from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
@@ -58,6 +59,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       CodeBlockLowlight,
       MathInline,
       MathBlock,
+      PlantUMLBlock,
     ],
     content,
     onUpdate: ({ editor: e }) => {

@@ -7,6 +7,7 @@ export { Table, TableRow, TableHeader, TableCell } from "./table";
 export { CodeBlockLowlight } from "./code-block";
 export { MathInline } from "./math-inline";
 export { MathBlock } from "./math-block";
+export { PlantUMLBlock } from "./plantuml-block";
 
 /*
  * 后续扩展在此统一导出，例如：
