@@ -17,7 +17,9 @@ import {
   MathBlock,
   PlantUMLBlock,
   VideoBlock,
+  SlashCommand,
 } from "@/extensions";
+import { slashCommandSuggestion } from "./slash-command-suggestion";
 
 export interface UseMarkdownEditorOptions {
   /** 初始内容 (HTML string) */
@@ -62,6 +64,9 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       MathBlock,
       PlantUMLBlock,
       VideoBlock,
+      SlashCommand.configure({
+        suggestion: slashCommandSuggestion,
+      }),
     ],
     content,
     onUpdate: ({ editor: e }) => {

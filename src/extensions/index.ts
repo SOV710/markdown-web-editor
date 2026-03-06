@@ -9,6 +9,7 @@ export { MathInline } from "./math-inline";
 export { MathBlock } from "./math-block";
 export { PlantUMLBlock } from "./plantuml-block";
 export { VideoBlock } from "./video-block";
+export { SlashCommand } from "./slash-command";
 
 /*
  * 后续扩展在此统一导出，例如：
