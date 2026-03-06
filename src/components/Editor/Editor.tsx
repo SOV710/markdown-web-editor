@@ -2,6 +2,7 @@ import { EditorContent } from "@tiptap/react";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
 import { Toolbar } from "./Toolbar";
+import { TableMenu } from "./TableMenu";
 import styles from "./Editor.module.css";
 import "@/styles/editor.css";
 
@@ -17,6 +18,7 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
       <Toolbar editor={editor} />
       <div className={styles.editorArea}>
         <EditorContent editor={editor} />
+        {editor && <TableMenu editor={editor} />}
       </div>
     </div>
   );

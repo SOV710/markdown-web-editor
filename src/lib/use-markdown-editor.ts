@@ -1,7 +1,18 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
-import { CustomKeymap, Underline, TaskList, TaskItem, Link, Image } from "@/extensions";
+import {
+  CustomKeymap,
+  Underline,
+  TaskList,
+  TaskItem,
+  Link,
+  Image,
+  Table,
+  TableRow,
+  TableHeader,
+  TableCell,
+} from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
   /** 初始内容 (HTML string) */
@@ -39,6 +50,10 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       TaskItem,
       Link,
       Image,
+      Table,
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content,
     onUpdate: ({ editor: e }) => {

@@ -55,3 +55,41 @@
   flex: 1;
   overflow-y: auto;
 }
+
+/* Table context menu */
+.tableMenu {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tableMenuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tableMenuBtn:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.tableMenuDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border);
+}

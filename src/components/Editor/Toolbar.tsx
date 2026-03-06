@@ -172,6 +172,14 @@ export function Toolbar({ editor }: ToolbarProps) {
       >
         {"🖼️"}
       </ToolbarBtn>
+      <ToolbarBtn
+        onClick={() =>
+          editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+        }
+        title="Insert table"
+      >
+        {"⊞"}
+      </ToolbarBtn>
     </div>
   );
 }

@@ -3,6 +3,7 @@ export { Underline } from "./underline";
 export { TaskList, TaskItem } from "./task-list";
 export { Link } from "./link";
 export { Image } from "./image";
+export { Table, TableRow, TableHeader, TableCell } from "./table";
 
 /*
  * 后续扩展在此统一导出，例如：
