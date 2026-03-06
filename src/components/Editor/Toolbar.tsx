@@ -41,6 +41,13 @@ function handleLinkClick(editor: Editor) {
   }
 }
 
+function handleImageClick(editor: Editor) {
+  const url = window.prompt("Image URL:");
+  if (url) {
+    editor.chain().focus().setImage({ src: url }).run();
+  }
+}
+
 export function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null;
 
@@ -158,6 +165,12 @@ export function Toolbar({ editor }: ToolbarProps) {
         title="Horizontal rule"
       >
         ―
+      </ToolbarBtn>
+      <ToolbarBtn
+        onClick={() => handleImageClick(editor)}
+        title="Image"
+      >
+        {"🖼️"}
       </ToolbarBtn>
     </div>
   );
