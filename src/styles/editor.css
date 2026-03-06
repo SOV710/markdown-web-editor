@@ -261,3 +261,15 @@
   background: #ffeef0;
   border-radius: var(--radius-sm);
 }
+
+/* ── Video Block ── */
+.tiptap .video-block {
+  margin: var(--space-4) 0;
+}
+
+.tiptap .video-block-player {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  background: #000;
+}

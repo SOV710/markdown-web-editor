@@ -48,6 +48,16 @@ function handleImageClick(editor: Editor) {
   }
 }
 
+function handleVideoClick(editor: Editor) {
+  const url = window.prompt("Video URL:");
+  if (url) {
+    editor.commands.insertContent({
+      type: "videoBlock",
+      attrs: { src: url },
+    });
+  }
+}
+
 export function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null;
 
@@ -179,6 +189,12 @@ export function Toolbar({ editor }: ToolbarProps) {
         title="Insert table"
       >
         {"⊞"}
+      </ToolbarBtn>
+      <ToolbarBtn
+        onClick={() => handleVideoClick(editor)}
+        title="Insert video"
+      >
+        {"▶"}
       </ToolbarBtn>
     </div>
   );

@@ -16,6 +16,7 @@ import {
   MathInline,
   MathBlock,
   PlantUMLBlock,
+  VideoBlock,
 } from "@/extensions";
 
 export interface UseMarkdownEditorOptions {
@@ -60,6 +61,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       MathInline,
       MathBlock,
       PlantUMLBlock,
+      VideoBlock,
     ],
     content,
     onUpdate: ({ editor: e }) => {
