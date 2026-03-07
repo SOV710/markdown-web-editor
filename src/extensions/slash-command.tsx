@@ -21,10 +21,13 @@ import {
 
 const SLASH_ICON_SIZE = 20;
 
+export type SlashCommandGroup = "text" | "list" | "block" | "media" | "advanced";
+
 export interface SlashCommandItem {
   title: string;
   description: string;
   icon: ReactNode;
+  group: SlashCommandGroup;
   command: (props: { editor: Editor; range: Range }) => void;
 }
 
@@ -33,6 +36,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Heading 1",
     description: "Large section heading",
     icon: <TextHOne size={SLASH_ICON_SIZE} />,
+    group: "text",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run();
     },
@@ -41,6 +45,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Heading 2",
     description: "Medium section heading",
     icon: <TextHTwo size={SLASH_ICON_SIZE} />,
+    group: "text",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run();
     },
@@ -49,6 +54,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Heading 3",
     description: "Small section heading",
     icon: <TextHThree size={SLASH_ICON_SIZE} />,
+    group: "text",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run();
     },
@@ -57,6 +63,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Bullet List",
     description: "Create a simple bullet list",
     icon: <ListBullets size={SLASH_ICON_SIZE} />,
+    group: "list",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleBulletList().run();
     },
@@ -65,6 +72,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Numbered List",
     description: "Create a numbered list",
     icon: <ListNumbers size={SLASH_ICON_SIZE} />,
+    group: "list",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run();
     },
@@ -73,6 +81,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Task List",
     description: "Track tasks with checkboxes",
     icon: <CheckSquare size={SLASH_ICON_SIZE} />,
+    group: "list",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleTaskList().run();
     },
@@ -81,6 +90,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Blockquote",
     description: "Capture a quote",
     icon: <Quotes size={SLASH_ICON_SIZE} />,
+    group: "block",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleBlockquote().run();
     },
@@ -89,6 +99,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Code Block",
     description: "Display code with syntax highlighting",
     icon: <CodeBlock size={SLASH_ICON_SIZE} />,
+    group: "block",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
     },
@@ -97,6 +108,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Horizontal Rule",
     description: "Divide content with a line",
     icon: <Minus size={SLASH_ICON_SIZE} />,
+    group: "block",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).setHorizontalRule().run();
     },
@@ -105,6 +117,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Table",
     description: "Insert a 3x3 table",
     icon: <Table size={SLASH_ICON_SIZE} />,
+    group: "media",
     command: ({ editor, range }) => {
       editor
         .chain()
@@ -118,6 +131,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Image",
     description: "Insert an image from URL",
     icon: <Image size={SLASH_ICON_SIZE} />,
+    group: "media",
     command: ({ editor, range }) => {
       const url = window.prompt("Image URL:");
       if (url) {
@@ -129,6 +143,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Video",
     description: "Insert a video from URL",
     icon: <VideoCamera size={SLASH_ICON_SIZE} />,
+    group: "media",
     command: ({ editor, range }) => {
       const url = window.prompt("Video URL:");
       if (url) {
@@ -144,6 +159,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "Math Block",
     description: "Insert a LaTeX math block",
     icon: <MathOperations size={SLASH_ICON_SIZE} />,
+    group: "advanced",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
       editor.commands.insertContent({
@@ -156,6 +172,7 @@ export const slashCommandItems: SlashCommandItem[] = [
     title: "PlantUML",
     description: "Insert a PlantUML diagram",
     icon: <TreeStructure size={SLASH_ICON_SIZE} />,
+    group: "advanced",
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).run();
       editor.commands.insertContent({
