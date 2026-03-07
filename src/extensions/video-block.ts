@@ -1,4 +1,13 @@
 import { Node, mergeAttributes } from "@tiptap/core";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+
+// Types for tiptap-markdown serialization
+interface MarkdownSerializerState {
+  write(text: string): void;
+  text(text: string, escape?: boolean): void;
+  ensureNewLine(): void;
+  closeBlock(node: ProseMirrorNode): void;
+}
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -36,6 +45,25 @@ export const VideoBlock = Node.create({
       {
         tag: 'div[data-type="video-block"]',
       },
+      {
+        // Parse raw <video> tags from Markdown HTML
+        tag: "video[src]",
+        getAttrs: (element) => {
+          const el = element as HTMLVideoElement;
+          const widthAttr = el.getAttribute("width");
+          let width = 100;
+          if (widthAttr) {
+            // Handle both "50%" and "50" formats
+            const parsed = parseInt(widthAttr.replace("%", ""), 10);
+            if (!isNaN(parsed)) width = parsed;
+          }
+          return {
+            src: el.getAttribute("src") || "",
+            width,
+            title: el.getAttribute("title") || "",
+          };
+        },
+      },
     ];
   },
 
@@ -44,6 +72,26 @@ export const VideoBlock = Node.create({
       "div",
       mergeAttributes(HTMLAttributes, { "data-type": "video-block" }),
     ];
+  },
+
+  addStorage() {
+    return {
+      markdown: {
+        // Serialize as raw HTML since Markdown has no video syntax
+        // html: true is enabled in Markdown.configure() to support this
+        serialize(state: MarkdownSerializerState, node: ProseMirrorNode) {
+          const src = node.attrs.src as string;
+          const width = node.attrs.width as number;
+          const title = node.attrs.title as string;
+          state.write(`<video src="${src}" width="${width}%" title="${title}"></video>`);
+          state.closeBlock(node);
+        },
+        parse: {
+          // Parsing is handled by parseHTML() since markdown-it with html: true
+          // will pass through <video> tags which TipTap then parses
+        },
+      },
+    };
   },
 
   addNodeView() {
