@@ -1,4 +1,5 @@
 import { Extension } from "@tiptap/core";
+import { insertMarkdownLink } from "@/lib/link-utils";
 
 /**
  * 自定义快捷键扩展。
@@ -9,6 +10,7 @@ import { Extension } from "@tiptap/core";
  *   - Ctrl+Alt+0            → Normal text (paragraph)
  *   - Ctrl+U                → Underline
  *   - Ctrl+Shift+H          → Highlight
+ *   - Ctrl+K                → Insert Markdown link
  */
 export const CustomKeymap = Extension.create({
   name: "customKeymap",
@@ -33,6 +35,10 @@ export const CustomKeymap = Extension.create({
         this.editor.chain().focus().toggleUnderline().run(),
       "Mod-Shift-h": () =>
         this.editor.chain().focus().toggleHighlight().run(),
+      "Mod-k": () => {
+        insertMarkdownLink(this.editor);
+        return true;
+      },
     };
   },
 });

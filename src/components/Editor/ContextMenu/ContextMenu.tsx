@@ -19,11 +19,11 @@ import {
   ClipboardText,
 } from "@phosphor-icons/react";
 import { findWordAtPosition } from "@/lib/word-segmentation";
+import { insertMarkdownLink, insertMarkdownImage } from "@/lib/link-utils";
 import styles from "./ContextMenu.module.css";
 
 export interface ContextMenuProps {
   editor: Editor | null;
-  onOpenLinkInput?: () => void;
 }
 
 interface MenuPosition {
@@ -44,7 +44,7 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
+export function ContextMenu({ editor }: ContextMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [clickPosition, setClickPosition] = useState<MenuPosition>({ x: 0, y: 0 });
   const [adjustedPosition, setAdjustedPosition] = useState<MenuPosition>({ x: 0, y: 0 });
@@ -281,19 +281,12 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         icon: <Link size={16} weight="bold" />,
         label: "Link",
         shortcut: "Ctrl+K",
-        action: () => {
-          onOpenLinkInput?.();
-        },
+        action: () => insertMarkdownLink(editor),
       },
       {
         icon: <Image size={16} weight="bold" />,
         label: "Image",
-        action: () => {
-          const url = window.prompt("Enter image URL:");
-          if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
-          }
-        },
+        action: () => insertMarkdownImage(editor),
       },
       {
         icon: <Table size={16} weight="bold" />,
