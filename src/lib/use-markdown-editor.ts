@@ -20,6 +20,7 @@ import {
   VideoBlock,
   SlashCommand,
   HeadingPlaceholder,
+  Highlight,
 } from "@/extensions";
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
@@ -74,6 +75,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       PlantUMLBlock,
       VideoBlock,
       HeadingPlaceholder,
+      Highlight,
       SlashCommand.configure({
         suggestion: slashCommandSuggestion,
       }),

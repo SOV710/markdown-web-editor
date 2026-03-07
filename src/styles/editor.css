@@ -84,6 +84,13 @@
   text-decoration: line-through;
 }
 
+.tiptap mark {
+  background: linear-gradient(104deg, rgba(255, 220, 0, 0) 0.9%, rgba(255, 220, 0, 0.6) 2.4%, rgba(255, 220, 0, 0.35) 5.8%, rgba(255, 220, 0, 0.2) 93%, rgba(255, 220, 0, 0.6) 96%, rgba(255, 250, 0, 0) 98%);
+  border-radius: 2px;
+  padding: 1px 2px;
+  margin: 0 -2px;
+}
+
 /* ── Code (inline) ── */
 .tiptap code {
   font-family: var(--font-mono);

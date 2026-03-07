@@ -8,6 +8,7 @@ import { Extension } from "@tiptap/core";
  *   - Ctrl+Alt+1/2/3/4/5/6  → Heading 1/2/3/4/5/6
  *   - Ctrl+Alt+0            → Normal text (paragraph)
  *   - Ctrl+U                → Underline
+ *   - Ctrl+Shift+H          → Highlight
  */
 export const CustomKeymap = Extension.create({
   name: "customKeymap",
@@ -30,6 +31,8 @@ export const CustomKeymap = Extension.create({
         this.editor.chain().focus().setParagraph().run(),
       "Mod-u": () =>
         this.editor.chain().focus().toggleUnderline().run(),
+      "Mod-Shift-h": () =>
+        this.editor.chain().focus().toggleHighlight().run(),
     };
   },
 });

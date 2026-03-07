@@ -11,3 +11,4 @@ export { PlantUMLBlock } from "./plantuml-block";
 export { VideoBlock } from "./video-block";
 export { SlashCommand } from "./slash-command";
 export { HeadingPlaceholder } from "./heading-placeholder";
+export { Highlight } from "./highlight";
