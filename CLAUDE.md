@@ -35,9 +35,11 @@ Rich Text Mode (TipTap)  <->  Markdown String (tiptap-markdown)  <->  Source Mod
 |------|---------|
 | `src/lib/use-markdown-editor.ts` | Main hook that configures TipTap with all extensions |
 | `src/lib/slash-command-suggestion.tsx` | Slash command Suggestion API config with Tippy.js |
+| `src/lib/word-segmentation.ts` | Intl.Segmenter-based word boundary detection for CJK |
 | `src/components/Editor/Editor.tsx` | Root component managing dual-view (rich text / source) |
 | `src/components/Editor/SourceEditor.tsx` | CodeMirror 6 Markdown editor for source mode |
-| `src/components/Editor/icons.ts` | Phosphor Icons sizing conventions (ICON_SIZE=18, ICON_SIZE_SM=16) |
+| `src/components/Editor/ContextMenu/` | Right-click context menu for formatting/insert/clipboard |
+| `src/components/Editor/LinkInput/` | Inline popover for adding/editing links |
 | `src/extensions/index.ts` | Barrel export for all custom TipTap extensions |
 
 ### Extension Pattern
@@ -78,6 +80,9 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 | Image | raw HTML | Resizable image with custom NodeView (10-100% width) |
 | VideoBlock | raw HTML | Resizable video player with custom NodeView |
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
+| Highlight | `==...==` | Marker pen style highlighting |
+| HeadingPlaceholder | - | Shows "Heading N" placeholder in empty headings |
+| LiveMarkdown | - | Typora-style live preview (shows syntax when cursor inside) |
 
 ### Styling
 
@@ -92,4 +97,18 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 
 - Dark toolbar (#1c1c1e) with glass effect (backdrop-filter blur)
 - White editor area with accent blue (#2563eb)
+- Right-click context menu with glass-morphism styling
 - Linear-inspired design with 150ms ease transitions
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Ctrl+B | Bold |
+| Ctrl+I | Italic |
+| Ctrl+U | Underline |
+| Ctrl+Shift+H | Highlight |
+| Ctrl+K | Add link |
+| Ctrl+M | Toggle source/rich text view |
+| Ctrl+Alt+1-6 | Heading 1-6 |
+| Ctrl+Alt+0 | Paragraph |
