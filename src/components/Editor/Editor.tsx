@@ -103,16 +103,6 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
           <EditorContent editor={editor} />
           {editor && <TableMenu editor={editor} />}
           {editor && (
-            <ContextMenu editor={editor} onOpenLinkInput={openLinkInput} />
-          )}
-          {editor && linkInput.isOpen && (
-            <LinkInput
-              editor={editor}
-              position={linkInput.position}
-              onClose={closeLinkInput}
-            />
-          )}
-          {editor && (
             <DragHandle editor={editor} className={styles.dragHandle}>
               <DotsSixVertical size={16} weight="bold" />
             </DragHandle>
@@ -123,6 +113,18 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
           value={markdownSource}
           onChange={setMarkdownSource}
           className={styles.editorArea}
+        />
+      )}
+
+      {/* Render outside .editorArea to avoid React/ProseMirror DOM conflicts */}
+      {editor && viewMode === "richtext" && (
+        <ContextMenu editor={editor} onOpenLinkInput={openLinkInput} />
+      )}
+      {editor && linkInput.isOpen && (
+        <LinkInput
+          editor={editor}
+          position={linkInput.position}
+          onClose={closeLinkInput}
         />
       )}
     </div>

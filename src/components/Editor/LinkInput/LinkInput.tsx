@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
 import { Link, X } from "@phosphor-icons/react";
 import styles from "./LinkInput.module.css";
@@ -86,7 +87,8 @@ export function LinkInput({ editor, onClose, position }: LinkInputProps) {
     y: Math.min(position.y, window.innerHeight - 80),
   };
 
-  return (
+  // Use portal to render outside any ProseMirror-managed DOM tree
+  return createPortal(
     <div
       ref={containerRef}
       className={styles.container}
@@ -123,6 +125,7 @@ export function LinkInput({ editor, onClose, position }: LinkInputProps) {
           )}
         </div>
       </form>
-    </div>
+    </div>,
+    document.body
   );
 }
