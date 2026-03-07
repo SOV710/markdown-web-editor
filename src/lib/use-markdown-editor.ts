@@ -19,7 +19,6 @@ import {
   PlantUMLBlock,
   VideoBlock,
   SlashCommand,
-  HeadingPlaceholder,
   Highlight,
   LiveMarkdown,
 } from "@/extensions";
@@ -52,7 +51,16 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
         heading: { levels: [1, 2, 3, 4, 5, 6] },
         codeBlock: false,
       }),
-      Placeholder.configure({ placeholder }),
+      Placeholder.configure({
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: true,
+        placeholder: ({ node }) => {
+          if (node.type.name === "heading") {
+            return `Heading ${node.attrs.level as number}`;
+          }
+          return placeholder;
+        },
+      }),
       // tiptap-markdown: enables Markdown serialization/parsing directly on ProseMirror doc
       // html: true allows raw HTML in Markdown (needed for video/image with attributes)
       Markdown.configure({
@@ -75,7 +83,6 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       MathBlock,
       PlantUMLBlock,
       VideoBlock,
-      HeadingPlaceholder,
       Highlight,
       LiveMarkdown,
       SlashCommand.configure({
