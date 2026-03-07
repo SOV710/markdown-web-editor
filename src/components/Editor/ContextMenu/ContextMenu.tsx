@@ -278,6 +278,75 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
     ],
   };
 
+  /**
+   * Copy selected content to clipboard using modern API with fallback.
+   */
+  const copyToClipboard = async () => {
+    if (!editor) return;
+
+    const { state } = editor;
+    const { selection } = state;
+
+    if (selection.empty) return;
+
+    // Get selected text
+    const selectedText = state.doc.textBetween(selection.from, selection.to, " ");
+
+    try {
+      // Try modern Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(selectedText);
+      } else {
+        // Fallback to execCommand
+        document.execCommand("copy");
+      }
+    } catch {
+      // Fallback to execCommand
+      document.execCommand("copy");
+    }
+  };
+
+  /**
+   * Cut selected content (copy then delete).
+   */
+  const cutToClipboard = async () => {
+    if (!editor) return;
+
+    const { state } = editor;
+    const { selection } = state;
+
+    if (selection.empty) return;
+
+    // Copy first
+    await copyToClipboard();
+
+    // Then delete selection
+    editor.chain().focus().deleteSelection().run();
+  };
+
+  /**
+   * Paste from clipboard.
+   */
+  const pasteFromClipboard = async () => {
+    if (!editor) return;
+
+    try {
+      // Try modern Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          editor.chain().focus().insertContent(text).run();
+          return;
+        }
+      }
+    } catch {
+      // Clipboard API may fail due to permissions
+    }
+
+    // Fallback: use execCommand (may not work in all browsers)
+    document.execCommand("paste");
+  };
+
   const clipboardSection: MenuSection = {
     title: "Clipboard",
     items: [
@@ -286,7 +355,7 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         label: "Cut",
         shortcut: "Ctrl+X",
         action: () => {
-          document.execCommand("cut");
+          cutToClipboard();
         },
       },
       {
@@ -294,7 +363,7 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         label: "Copy",
         shortcut: "Ctrl+C",
         action: () => {
-          document.execCommand("copy");
+          copyToClipboard();
         },
       },
       {
@@ -302,7 +371,7 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         label: "Paste",
         shortcut: "Ctrl+V",
         action: () => {
-          document.execCommand("paste");
+          pasteFromClipboard();
         },
       },
     ],
