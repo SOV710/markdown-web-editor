@@ -1,117 +1,139 @@
-# 架构概述
+# Architecture
 
-## 分层结构
+## Layer Structure
 
 ```
 ┌─────────────────────────────────────────┐
-│              App.tsx                    │  入口
+│              App.tsx                    │  Entry point
 ├─────────────────────────────────────────┤
-│           Components Layer              │  UI 组件
-│  (Editor, Toolbar, BubbleToolbar, ...)  │
+│           Components Layer              │  UI components
+│  (Editor, ContextMenu, TableMenu, ...)  │
 ├─────────────────────────────────────────┤
-│             Library Layer               │  工具层
-│  (useMarkdownEditor, slashCommandSuggestion)
+│             Library Layer               │  Utilities
+│  (useMarkdownEditor, linkUtils, ...)    │
 ├─────────────────────────────────────────┤
-│           Extensions Layer              │  扩展层
+│           Extensions Layer              │  TipTap extensions
 │  (Image, Table, MathBlock, ...)         │
 ├─────────────────────────────────────────┤
-│         TipTap / ProseMirror            │  编辑器核心
+│         TipTap / ProseMirror            │  Editor core
 └─────────────────────────────────────────┘
 ```
 
-## 数据流
+## Data Flow
 
 ```
-用户输入
+User Input
     │
     ▼
 TipTap Editor (ProseMirror)
     │
     ▼
-Extensions 处理节点/标记
+Extensions process nodes/marks
     │
     ▼
-tiptap-markdown 序列化
+tiptap-markdown serialization
     │
     ▼
-onUpdate 回调 → 返回 Markdown 字符串
+onUpdate callback → returns Markdown string
 ```
 
-## 视图模式切换
+## View Mode Toggle
 
-使用 tiptap-markdown 直接在 ProseMirror 文档模型上转换:
+Bidirectional conversion using tiptap-markdown directly on ProseMirror document model:
 
 ```
 Rich Text Mode                    Source Mode (CodeMirror 6)
      │                                 │
-     │  Ctrl+M 或点击切换               │
+     │  Ctrl+M or click toggle         │
      ▼                                 ▼
-editor.storage.markdown ────→   Markdown 字符串
+editor.storage.markdown ────→   Markdown string
     .getMarkdown()                     │
                                        │
-editor.commands ←──────────────  用户编辑
+editor.commands ←──────────────  User edits
     .setContent(markdown)
 ```
 
-## 目录职责
+## Directory Responsibilities
 
-| 目录 | 职责 |
-|------|------|
-| `src/extensions/` | TipTap 节点 (Node) 和扩展 (Extension) 定义 |
-| `src/components/Editor/` | React UI 组件 |
-| `src/lib/` | 编辑器初始化 Hook、Suggestion 配置 |
-| `src/styles/` | CSS 变量、编辑器内容样式 |
-| `src/types/` | TypeScript 类型定义 |
+| Directory | Purpose |
+|-----------|---------|
+| `src/extensions/` | TipTap Node and Extension definitions |
+| `src/components/Editor/` | React UI components |
+| `src/lib/` | Editor initialization hook, utilities |
+| `src/styles/` | CSS variables, editor content styles |
+| `src/types/` | TypeScript type definitions |
 
-## 扩展类型
+## Extension Types
 
-TipTap 扩展分三类:
+TipTap extensions fall into three categories:
 
-| 类型 | 说明 | 示例 |
-|------|------|------|
-| Node | 块级或行内节点 | Image, Table, MathBlock, VideoBlock |
-| Mark | 文本修饰 | Underline, Link |
-| Extension | 功能增强 | SlashCommand, CustomKeymap |
+| Type | Description | Examples |
+|------|-------------|----------|
+| Node | Block or inline content | Image, Table, MathBlock, VideoBlock |
+| Mark | Text decoration | Underline, Link, Highlight |
+| Extension | Feature enhancement | SlashCommand, CustomKeymap, LiveMarkdown |
 
-## 关键设计
+## Key Design Decisions
 
-### 1. Markdown 双向转换
+### 1. Markdown Bidirectional Conversion
 
-使用 tiptap-markdown 扩展:
-- 配置 `html: true` 允许原始 HTML (用于 Image/VideoBlock 保留 width)
-- 配置 `transformPastedText: true` 粘贴时转换
-- 配置 `transformCopiedText: true` 复制时转换
-- 自定义扩展通过 `addStorage().markdown` 定义序列化/解析规则
+Using tiptap-markdown extension:
+- `html: true` allows raw HTML (for Image/VideoBlock width preservation)
+- `transformPastedText: true` converts pasted text
+- `transformCopiedText: true` converts copied text
+- Custom extensions define serialization/parsing via `addStorage().markdown`
 
-### 2. 可调整大小的媒体
+### 2. Resizable Media
 
-Image 和 VideoBlock 使用自定义 NodeView:
-- 创建容器 div + 左右 resize-handle
-- mousedown/mousemove/mouseup 事件计算宽度百分比
-- 通过 `tr.setNodeMarkup()` 更新节点属性
-- 宽度范围: 10% - 100%
-- 序列化为 `<img width="50%">` / `<video width="50%">` 格式
+Image and VideoBlock use custom NodeView:
+- Container div with left/right resize-handle elements
+- mousedown/mousemove/mouseup events calculate width percentage
+- `tr.setNodeMarkup()` updates node attributes
+- Width range: 10% - 100%
+- Serializes as `<img width="50%">` / `<video width="50%">`
 
-### 3. 斜杠命令
+### 3. Slash Commands
 
-基于 TipTap Suggestion API:
-- 监听 `/` 字符触发
-- 使用 Tippy.js 定位弹出菜单 (placement: bottom-start)
-- 支持键盘导航 (ArrowUp/Down, Enter, Escape)
-- 命令分组: text, list, block, media, advanced
-- 模糊搜索过滤
+Based on TipTap Suggestion API:
+- Listens for `/` character trigger
+- Tippy.js positions popup menu (placement: bottom-start)
+- Keyboard navigation (ArrowUp/Down, Enter, Escape)
+- Command groups: text, list, block, media, advanced
+- Fuzzy search filtering
 
-### 4. 双视图同步
+### 4. Dual View Synchronization
 
 - Rich Text → Source: `editor.storage.markdown.getMarkdown()`
 - Source → Rich Text: `editor.commands.setContent(markdownString)`
-- 快捷键: `Ctrl+M` 切换视图
-- Source 编辑器使用 CodeMirror 6 + Markdown 语言支持
+- Shortcut: `Ctrl+M` toggles view
+- Source editor uses CodeMirror 6 with Markdown language support
 
-### 5. 图标系统
+### 5. Portal Rendering
 
-使用 Phosphor Icons (`@phosphor-icons/react`):
-- 工具栏按钮: 18px (`ICON_SIZE`)
-- 浮动菜单: 16px (`ICON_SIZE_SM`)
-- 斜杠菜单: 20px (`SLASH_ICON_SIZE`)
-- 表格菜单: 14px (`TABLE_ICON_SIZE`)
+ContextMenu renders via `createPortal(element, document.body)`:
+- Avoids React/ProseMirror DOM conflicts
+- ProseMirror mutates DOM directly outside React's knowledge
+- Rendering inside ProseMirror-managed DOM causes `insertBefore` errors
+- Portal ensures menu DOM is managed separately
+
+### 6. Live Markdown Preview
+
+LiveMarkdown extension uses ProseMirror decorations:
+- Adds widget decorations for Markdown syntax markers
+- Shows `**` around bold text, `#` before headings when cursor is inside
+- Hides markers when cursor moves elsewhere (Typora-style)
+- Wrapped in try-catch returning `DecorationSet.empty` on error
+
+### 7. Placeholder System
+
+Uses TipTap Placeholder extension with per-node-type function:
+```typescript
+Placeholder.configure({
+  placeholder: ({ node }) => {
+    if (node.type.name === "heading") {
+      return `Heading ${node.attrs.level}`;
+    }
+    return "Type '/' for commands…";
+  },
+})
+```

@@ -1,8 +1,8 @@
-# 样式系统 (Styles)
+# Styling
 
-全局样式位于 `src/styles/`，组件样式使用 CSS Modules。
+Global styles are in `src/styles/`, component styles use CSS Modules.
 
-## 目录
+## Contents
 
 - [reset.css](#resetcss)
 - [editor.css](#editorcss)
@@ -14,15 +14,15 @@
 
 ## reset.css
 
-**文件**: `src/styles/reset.css`
+**File**: `src/styles/reset.css`
 
-**功能**: CSS 变量定义和全局重置
+**Purpose**: CSS variables and global reset
 
-### 设计令牌
+### Design Tokens
 
-**间距**:
-| 变量 | 值 |
-|------|------|
+**Spacing**:
+| Variable | Value |
+|----------|-------|
 | --space-1 | 4px |
 | --space-2 | 8px |
 | --space-3 | 12px |
@@ -30,48 +30,48 @@
 | --space-6 | 24px |
 | --space-8 | 32px |
 
-**颜色 (编辑区)**:
-| 变量 | 值 | 说明 |
-|------|------|------|
-| --color-bg | #ffffff | 背景色 |
-| --color-bg-subtle | #f8f9fa | 次级背景 |
-| --color-border | #e2e4e8 | 边框 |
-| --color-border-strong | #cfd1d6 | 强调边框 |
-| --color-text | #1c1e21 | 主文本 |
-| --color-text-secondary | #656d76 | 次级文本 |
-| --color-text-placeholder | #a0a5ad | 占位符 |
-| --color-accent | #2563eb | 强调色 |
-| --color-accent-hover | #1d4ed8 | 强调色悬停 |
+**Editor Area Colors**:
+| Variable | Value | Description |
+|----------|-------|-------------|
+| --color-bg | #ffffff | Background |
+| --color-bg-subtle | #f8f9fa | Secondary background |
+| --color-border | #e2e4e8 | Border |
+| --color-border-strong | #cfd1d6 | Strong border |
+| --color-text | #1c1e21 | Primary text |
+| --color-text-secondary | #656d76 | Secondary text |
+| --color-text-placeholder | #a0a5ad | Placeholder text |
+| --color-accent | #2563eb | Accent color |
+| --color-accent-hover | #1d4ed8 | Accent hover |
 
-**工具栏颜色 (深色主题)**:
-| 变量 | 值 | 说明 |
-|------|------|------|
-| --color-toolbar-bg | #1c1c1e | 工具栏背景 |
-| --color-toolbar-border | rgba(255, 255, 255, 0.08) | 工具栏边框 |
-| --color-toolbar-text | rgba(255, 255, 255, 0.65) | 工具栏文本 |
-| --color-toolbar-text-hover | rgba(255, 255, 255, 0.95) | 悬停文本 |
-| --color-toolbar-text-active | #ffffff | 激活文本 |
-| --color-toolbar-btn-hover-bg | rgba(255, 255, 255, 0.1) | 按钮悬停背景 |
-| --color-toolbar-btn-active-bg | var(--color-accent) | 按钮激活背景 |
+**Toolbar Colors (Dark Theme)**:
+| Variable | Value | Description |
+|----------|-------|-------------|
+| --color-toolbar-bg | #1c1c1e | Toolbar background |
+| --color-toolbar-border | rgba(255, 255, 255, 0.08) | Toolbar border |
+| --color-toolbar-text | rgba(255, 255, 255, 0.65) | Toolbar text |
+| --color-toolbar-text-hover | rgba(255, 255, 255, 0.95) | Hover text |
+| --color-toolbar-text-active | #ffffff | Active text |
+| --color-toolbar-btn-hover-bg | rgba(255, 255, 255, 0.1) | Button hover background |
+| --color-toolbar-btn-active-bg | var(--color-accent) | Button active background |
 
-**字体**:
-| 变量 | 值 |
-|------|------|
+**Fonts**:
+| Variable | Value |
+|----------|-------|
 | --font-sans | -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ... |
 | --font-mono | "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace |
 | --font-size-base | 16px |
 | --line-height-base | 1.625 |
 
-**圆角**:
-| 变量 | 值 |
-|------|------|
+**Border Radius**:
+| Variable | Value |
+|----------|-------|
 | --radius-sm | 6px |
 | --radius-md | 8px |
 | --radius-lg | 10px |
 
-**阴影**:
-| 变量 | 值 |
-|------|------|
+**Shadows**:
+| Variable | Value |
+|----------|-------|
 | --shadow-sm | 0 1px 2px rgba(0, 0, 0, 0.05) |
 | --shadow-md | 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05) |
 | --shadow-lg | 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) |
@@ -80,53 +80,53 @@
 
 ## editor.css
 
-**文件**: `src/styles/editor.css`
+**File**: `src/styles/editor.css`
 
-**功能**: TipTap 编辑器内容区域样式
+**Purpose**: TipTap editor content area styles
 
-**选择器前缀**: `.tiptap`
+**Selector Prefix**: `.tiptap`
 
-### 基础元素
+### Base Elements
 
-| 选择器 | 说明 |
-|------|------|
-| `.tiptap` | 编辑器根容器，padding: var(--space-6), min-height: 300px |
-| `.tiptap h1/h2/h3` | 标题样式 |
-| `.tiptap p` | 段落，margin-bottom: 0.75em |
-| `.tiptap strong/em/u/s` | 文本修饰 |
-| `.tiptap code` | 行内代码，灰色背景 + 圆角 |
-| `.tiptap pre` | 代码块，左侧 3px 强调边框 |
-| `.tiptap blockquote` | 引用块，左侧蓝色边框 + 渐变背景 |
-| `.tiptap ul/ol` | 列表 |
-| `.tiptap ul[data-type="taskList"]` | 任务列表，flex 布局 |
-| `.tiptap hr` | 分隔线 |
-| `.tiptap a` | 链接，蓝色强调色 |
-| `.tiptap img` | 图片，max-width: 100% |
-| `.tiptap table/th/td` | 表格，边框折叠 |
+| Selector | Description |
+|----------|-------------|
+| `.tiptap` | Editor root container, padding: var(--space-6), min-height: 300px |
+| `.tiptap h1/h2/h3` | Heading styles |
+| `.tiptap p` | Paragraph, margin-bottom: 0.75em |
+| `.tiptap strong/em/u/s` | Text decorations |
+| `.tiptap code` | Inline code, gray background + border radius |
+| `.tiptap pre` | Code block, left 3px accent border |
+| `.tiptap blockquote` | Blockquote, left blue border + gradient background |
+| `.tiptap ul/ol` | Lists |
+| `.tiptap ul[data-type="taskList"]` | Task list, flex layout |
+| `.tiptap hr` | Horizontal rule |
+| `.tiptap a` | Links, blue accent color |
+| `.tiptap img` | Images, max-width: 100% |
+| `.tiptap table/th/td` | Tables, border-collapse |
 
-### 特殊块样式
+### Special Block Styles
 
-| 类名 | 说明 |
-|------|------|
-| `.plantuml-block` | PlantUML 容器，绿色渐变背景 |
-| `.plantuml-block-input` | PlantUML 输入框 |
-| `.plantuml-block-preview` | PlantUML 预览区 |
-| `.plantuml-error` | PlantUML 错误信息 |
-| `.video-block` | 视频容器 |
-| `.video-block-player` | 视频播放器，黑色背景 |
+| Class | Description |
+|-------|-------------|
+| `.plantuml-block` | PlantUML container, green gradient background |
+| `.plantuml-block-input` | PlantUML textarea input |
+| `.plantuml-block-preview` | PlantUML preview area |
+| `.plantuml-error` | PlantUML error message |
+| `.video-block` | Video container |
+| `.video-block-player` | Video player, black background |
 
-### 可调整大小的媒体
+### Resizable Media
 
-| 类名 | 说明 |
-|------|------|
-| `.resizable-image` | 图片容器，inline-block |
-| `.resizable-video` | 视频容器，inline-block |
-| `.resize-handle` | 调整把手，透明，悬停显示 |
-| `.resize-handle-left` | 左侧把手 |
-| `.resize-handle-right` | 右侧把手 |
-| `.resize-handle::after` | 把手指示条，蓝色 4px 宽 |
+| Class | Description |
+|-------|-------------|
+| `.resizable-image` | Image container, inline-block |
+| `.resizable-video` | Video container, inline-block |
+| `.resize-handle` | Resize handle, transparent, visible on hover |
+| `.resize-handle-left` | Left handle |
+| `.resize-handle-right` | Right handle |
+| `.resize-handle::after` | Handle indicator bar, blue 4px wide |
 
-### 占位符
+### Placeholder
 
 ```css
 .tiptap p.is-editor-empty:first-child::before {
@@ -135,38 +135,50 @@
 }
 ```
 
+### Live Markdown Markers
+
+| Class | Description |
+|-------|-------------|
+| `.live-md-heading-marker` | Heading markers (`#`, `##`, etc.) |
+| `.live-md-mark` | Generic mark markers |
+| `.live-md-bold` | Bold markers (`**`) |
+| `.live-md-italic` | Italic markers (`_`) |
+| `.live-md-strike` | Strikethrough markers (`~~`) |
+| `.live-md-code` | Inline code markers (`` ` ``) |
+| `.live-md-highlight` | Highlight markers (`==`) |
+
 ---
 
 ## hljs.css
 
-**文件**: `src/styles/hljs.css`
+**File**: `src/styles/hljs.css`
 
-**功能**: 代码语法高亮 (GitHub Light 主题)
+**Purpose**: Code syntax highlighting (GitHub Light theme)
 
-**类名前缀**: `.hljs-`
+**Class Prefix**: `.hljs-`
 
-**主要语法类**:
-| 类名 | 颜色 | 用途 |
-|------|------|------|
-| `.hljs-keyword` | #cf222e | 关键字 |
-| `.hljs-string` | #0a3069 | 字符串 |
-| `.hljs-number` | #0550ae | 数字 |
-| `.hljs-comment` | #6e7781 | 注释 |
-| `.hljs-function` | #8250df | 函数名 |
-| `.hljs-variable` | #953800 | 变量 |
-| `.hljs-title` | #8250df | 标题/函数定义 |
+**Main Syntax Classes**:
+| Class | Color | Purpose |
+|-------|-------|---------|
+| `.hljs-keyword` | #cf222e | Keywords |
+| `.hljs-string` | #0a3069 | Strings |
+| `.hljs-number` | #0550ae | Numbers |
+| `.hljs-comment` | #6e7781 | Comments |
+| `.hljs-function` | #8250df | Function names |
+| `.hljs-variable` | #953800 | Variables |
+| `.hljs-title` | #8250df | Titles/function definitions |
 
 ---
 
 ## katex.css
 
-**文件**: `src/styles/katex.css`
+**File**: `src/styles/katex.css`
 
-**功能**: KaTeX 数学公式样式
+**Purpose**: KaTeX math formula styles
 
-**导入**: `katex/dist/katex.min.css`
+**Import**: `katex/dist/katex.min.css`
 
-### 行内公式
+### Inline Formulas
 
 ```css
 .tiptap .math-inline {
@@ -182,52 +194,64 @@
 }
 ```
 
-### 块级公式
+### Block Formulas
 
-| 类名 | 说明 |
-|------|------|
-| `.math-block` | 公式容器，蓝色渐变背景 |
-| `.math-block-input` | 输入框，聚焦时蓝色光环 |
-| `.math-block-preview` | 预览区，居中显示 |
-| `.math-error` | 错误信息，红色背景 |
+| Class | Description |
+|-------|-------------|
+| `.math-block` | Formula container, blue gradient background |
+| `.math-block-input` | Input textarea, blue glow on focus |
+| `.math-block-preview` | Preview area, centered display |
+| `.math-error` | Error message, red background |
 
 ---
 
 ## CSS Modules
 
-组件级样式使用 CSS Modules，文件名 `*.module.css`。
+Component-level styles use CSS Modules (`*.module.css`).
 
-| 文件 | 组件 |
-|------|------|
+| File | Components |
+|------|------------|
 | `Editor.module.css` | Editor, Toolbar, TableMenu, DragHandle |
+| `ContextMenu.module.css` | ContextMenu |
 | `BubbleToolbar.module.css` | BubbleToolbar |
 | `SlashMenu.module.css` | SlashMenu |
 | `SourceEditor.module.css` | SourceEditor |
 | `ViewToggle.module.css` | ViewToggle |
 | `ResizeHandle.module.css` | ResizeHandle |
 
-### Editor.module.css 主要类
+### Editor.module.css Main Classes
 
-| 类名 | 说明 |
-|------|------|
-| `.wrapper` | 编辑器外层容器，max-width: 800px，box-shadow |
-| `.toolbarRow` | 工具栏行，深色背景 (#1c1c1e) |
-| `.toolbar` | 工具栏容器，flex wrap |
-| `.toolbarBtn` | 工具栏按钮，32x32px，data-active 状态 |
-| `.divider` | 分隔线，白色 12% 透明度 |
-| `.editorArea` | 编辑区域，min-height: 400px |
-| `.tableMenu` | 表格菜单，深色玻璃效果 |
-| `.tableMenuBtn` | 表格菜单按钮，gap: 4px |
-| `.dragHandle` | 拖动手柄，悬停显示工具提示 |
+| Class | Description |
+|-------|-------------|
+| `.wrapper` | Editor outer container, max-width: 800px, box-shadow |
+| `.toolbarRow` | Toolbar row, dark background (#1c1c1e) |
+| `.toolbar` | Toolbar container, flex wrap |
+| `.toolbarBtn` | Toolbar button, 32x32px, data-active state |
+| `.divider` | Separator, white 12% opacity |
+| `.editorArea` | Editor area, min-height: 400px |
+| `.tableMenu` | Table menu, dark glass effect |
+| `.tableMenuBtn` | Table menu button, gap: 4px |
+| `.dragHandle` | Drag handle, shows tooltip on hover |
 
-### SlashMenu.module.css 主要类
+### ContextMenu.module.css Main Classes
 
-| 类名 | 说明 |
-|------|------|
-| `.container` | 菜单容器，深色玻璃效果 |
-| `.groupHeader` | 分组标题，11px 大写 |
-| `.groupDivider` | 分组分隔线 |
-| `.item` | 菜单项，flex 布局 |
-| `.icon` | 图标容器，32x32px |
-| `.title` | 标题，14px 白色 |
-| `.description` | 描述，12px 半透明 |
+| Class | Description |
+|-------|-------------|
+| `.menu` | Menu container, dark glass effect, fixed position |
+| `.section` | Menu section |
+| `.sectionTitle` | Section title, uppercase 11px |
+| `.item` | Menu item, flex layout |
+| `.itemActive` | Active state indicator |
+| `.shortcut` | Keyboard shortcut display |
+
+### SlashMenu.module.css Main Classes
+
+| Class | Description |
+|-------|-------------|
+| `.container` | Menu container, dark glass effect |
+| `.groupHeader` | Group header, 11px uppercase |
+| `.groupDivider` | Group separator |
+| `.item` | Menu item, flex layout |
+| `.icon` | Icon container, 32x32px |
+| `.title` | Title, 14px white |
+| `.description` | Description, 12px semi-transparent |

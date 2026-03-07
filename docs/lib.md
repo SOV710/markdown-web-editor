@@ -1,21 +1,23 @@
-# 工具库 (Lib)
+# Library Utilities
 
-所有工具函数位于 `src/lib/`。
+All utility functions are in `src/lib/`.
 
-## 目录
+## Contents
 
 - [useMarkdownEditor](#usemarkdowneditor)
 - [slashCommandSuggestion](#slashcommandsuggestion)
+- [linkUtils](#linkutils)
+- [wordSegmentation](#wordsegmentation)
 
 ---
 
 ## useMarkdownEditor
 
-**文件**: `use-markdown-editor.ts`
+**File**: `use-markdown-editor.ts`
 
-**功能**: 初始化 TipTap 编辑器的 React Hook
+**Purpose**: React hook that initializes the TipTap editor
 
-**签名**:
+**Signature**:
 ```ts
 function useMarkdownEditor(options?: UseMarkdownEditorOptions): Editor | null
 ```
@@ -23,30 +25,30 @@ function useMarkdownEditor(options?: UseMarkdownEditorOptions): Editor | null
 **Options**:
 ```ts
 interface UseMarkdownEditorOptions {
-  /** 初始内容 (Markdown string) */
+  /** Initial content (Markdown string) */
   content?: string;
-  /** placeholder 提示文字 */
+  /** Placeholder text */
   placeholder?: string;
-  /** 内容变更回调 */
+  /** Content update callback */
   onUpdate?: (markdown: string) => void;
 }
 ```
 
-**默认内容**:
+**Default Content**:
 ```markdown
 ## Welcome to the Editor
 
 Start typing, or press `/` for commands…
 ```
 
-**默认 placeholder**: `Type '/' for commands…`
+**Default Placeholder**: `Type '/' for commands…`
 
-**注册的扩展**:
+**Registered Extensions**:
 
-| 扩展 | 配置 |
-|------|------|
-| StarterKit | heading: { levels: [1,2,3] }, codeBlock: false |
-| Placeholder | placeholder 文字 |
+| Extension | Configuration |
+|-----------|---------------|
+| StarterKit | heading: { levels: [1,2,3,4,5,6] }, codeBlock: false |
+| Placeholder | Per-node-type placeholder function |
 | Markdown | html: true, transformPastedText: true, transformCopiedText: true |
 | CustomKeymap | - |
 | Underline | - |
@@ -58,7 +60,23 @@ Start typing, or press `/` for commands…
 | MathInline, MathBlock | - |
 | PlantUMLBlock | - |
 | VideoBlock | - |
+| Highlight | - |
+| LiveMarkdown | - |
 | SlashCommand | suggestion: slashCommandSuggestion |
+
+**Placeholder Configuration**:
+```ts
+Placeholder.configure({
+  showOnlyWhenEditable: true,
+  showOnlyCurrent: true,
+  placeholder: ({ node }) => {
+    if (node.type.name === "heading") {
+      return `Heading ${node.attrs.level}`;
+    }
+    return placeholder;
+  },
+})
+```
 
 **editorProps**:
 ```ts
@@ -69,7 +87,7 @@ Start typing, or press `/` for commands…
 }
 ```
 
-**onUpdate 回调**:
+**onUpdate Callback**:
 ```ts
 onUpdate: ({ editor }) => {
   const storage = editor.storage as { markdown: MarkdownStorage };
@@ -77,7 +95,7 @@ onUpdate: ({ editor }) => {
 }
 ```
 
-**用法**:
+**Usage**:
 ```tsx
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 
@@ -97,18 +115,18 @@ function MyEditor() {
 
 ## slashCommandSuggestion
 
-**文件**: `slash-command-suggestion.tsx`
+**File**: `slash-command-suggestion.tsx`
 
-**功能**: 斜杠命令的 Suggestion 配置
+**Purpose**: Suggestion configuration for slash commands
 
-**导出**:
+**Export**:
 ```ts
 const slashCommandSuggestion: Partial<SuggestionOptions<SlashCommandItem>>
 ```
 
 ### items
 
-根据查询过滤命令列表:
+Filters command list based on query:
 ```ts
 items: ({ query }) => {
   return slashCommandItems.filter((item) =>
@@ -119,7 +137,7 @@ items: ({ query }) => {
 
 ### render
 
-使用 ReactRenderer + Tippy.js 渲染菜单:
+Renders menu using ReactRenderer + Tippy.js:
 
 ```ts
 render: () => {
@@ -135,26 +153,126 @@ render: () => {
 }
 ```
 
-**Tippy 配置**:
-| 选项 | 值 |
-|------|------|
+**Tippy Configuration**:
+| Option | Value |
+|--------|-------|
 | placement | bottom-start |
 | trigger | manual |
 | interactive | true |
 | showOnCreate | true |
 | appendTo | document.body |
 
-**渲染流程**:
-1. 用户输入 `/`
-2. Suggestion API 触发 `onStart`
-3. 创建 ReactRenderer 渲染 SlashMenu 组件
-4. 创建 Tippy 实例，使用 `clientRect` 定位弹窗
-5. 用户输入时 `onUpdate` 更新过滤结果和位置
-6. 键盘事件通过 `onKeyDown` 传递给 SlashMenu
-7. 用户选择命令或按 Escape 后 `onExit` 清理
+**Rendering Flow**:
+1. User types `/`
+2. Suggestion API triggers `onStart`
+3. Creates ReactRenderer to render SlashMenu component
+4. Creates Tippy instance, uses `clientRect` for positioning
+5. `onUpdate` updates filtered results and position on user input
+6. Keyboard events passed to SlashMenu via `onKeyDown`
+7. `onExit` cleans up when user selects command or presses Escape
 
-**依赖**:
+**Dependencies**:
 - `@tiptap/react` - ReactRenderer
-- `tippy.js` - 弹出定位
-- `@/components/Editor/SlashMenu` - 菜单组件
-- `@/extensions/slash-command` - 命令列表
+- `tippy.js` - Popup positioning
+- `@/components/Editor/SlashMenu` - Menu component
+- `@/extensions/slash-command` - Command list
+
+---
+
+## linkUtils
+
+**File**: `link-utils.ts`
+
+**Purpose**: Plain Markdown link and image insertion helpers
+
+### insertMarkdownLink
+
+**Signature**:
+```ts
+function insertMarkdownLink(editor: Editor): void
+```
+
+**Behavior**:
+| Selection State | Action |
+|-----------------|--------|
+| No selection | Insert `[]()`, cursor inside `[]` |
+| Has selection | Wrap as `[selectedText]()`, cursor inside `()` |
+
+**Usage**:
+```ts
+import { insertMarkdownLink } from "@/lib/link-utils";
+
+// Via keyboard shortcut (Mod-k)
+insertMarkdownLink(editor);
+```
+
+### insertMarkdownImage
+
+**Signature**:
+```ts
+function insertMarkdownImage(editor: Editor): void
+```
+
+**Behavior**:
+| Selection State | Action |
+|-----------------|--------|
+| No selection | Insert `![]()`, cursor inside `[]` for alt text |
+| Has selection | Use selection as alt text: `![selectedText]()`, cursor inside `()` |
+
+**Usage**:
+```ts
+import { insertMarkdownImage } from "@/lib/link-utils";
+
+// Via context menu
+insertMarkdownImage(editor);
+```
+
+---
+
+## wordSegmentation
+
+**File**: `word-segmentation.ts`
+
+**Purpose**: CJK-aware word boundary detection using `Intl.Segmenter`
+
+### WordBoundary
+
+```ts
+interface WordBoundary {
+  start: number;
+  end: number;
+  word: string;
+}
+```
+
+### findWordAtPosition
+
+**Signature**:
+```ts
+function findWordAtPosition(text: string, cursorPos: number): WordBoundary | null
+```
+
+**Purpose**: Find the word at a given cursor position
+
+**Features**:
+- Uses `Intl.Segmenter` for proper CJK word boundary detection
+- Falls back to regex matching if Segmenter unavailable
+- Returns `null` if cursor is not within a word
+
+**Fallback Regex**: `/[\w\u4e00-\u9fff\u3400-\u4dbf]+/g`
+- Matches ASCII word characters
+- Matches CJK unified ideographs (U+4E00-U+9FFF)
+- Matches CJK extension A (U+3400-U+4DBF)
+
+### getWords
+
+**Signature**:
+```ts
+function getWords(text: string): WordBoundary[]
+```
+
+**Purpose**: Get all words in a text string
+
+**Features**:
+- Returns array of all word segments with positions
+- Uses same `Intl.Segmenter` / regex fallback strategy

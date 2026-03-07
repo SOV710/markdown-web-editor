@@ -36,10 +36,10 @@ Rich Text Mode (TipTap)  <->  Markdown String (tiptap-markdown)  <->  Source Mod
 | `src/lib/use-markdown-editor.ts` | Main hook that configures TipTap with all extensions |
 | `src/lib/slash-command-suggestion.tsx` | Slash command Suggestion API config with Tippy.js |
 | `src/lib/word-segmentation.ts` | Intl.Segmenter-based word boundary detection for CJK |
+| `src/lib/link-utils.ts` | Functions for inserting Markdown link/image syntax |
 | `src/components/Editor/Editor.tsx` | Root component managing dual-view (rich text / source) |
 | `src/components/Editor/SourceEditor.tsx` | CodeMirror 6 Markdown editor for source mode |
-| `src/components/Editor/ContextMenu/` | Right-click context menu for formatting/insert/clipboard |
-| `src/components/Editor/LinkInput/` | Inline popover for adding/editing links |
+| `src/components/Editor/ContextMenu/` | Right-click context menu (renders via portal) |
 | `src/extensions/index.ts` | Barrel export for all custom TipTap extensions |
 
 ### Extension Pattern
@@ -81,7 +81,6 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 | VideoBlock | raw HTML | Resizable video player with custom NodeView |
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 | Highlight | `==...==` | Marker pen style highlighting |
-| HeadingPlaceholder | - | Shows "Heading N" placeholder in empty headings |
 | LiveMarkdown | - | Typora-style live preview (shows syntax when cursor inside) |
 
 ### Styling
@@ -93,12 +92,12 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 - Component styles use CSS Modules (`*.module.css`)
 - Icons use Phosphor Icons (`@phosphor-icons/react`)
 
-### UI Theme
+### UI Components
 
-- Dark toolbar (#1c1c1e) with glass effect (backdrop-filter blur)
-- White editor area with accent blue (#2563eb)
-- Right-click context menu with glass-morphism styling
-- Linear-inspired design with 150ms ease transitions
+- **ContextMenu**: Right-click menu rendered via `createPortal` to `document.body` to avoid ProseMirror DOM conflicts
+- **SlashMenu**: Command palette triggered by `/`, positioned via Tippy.js
+- **TableMenu**: Floating menu for table operations when cursor is in table
+- **ViewToggle**: Switches between rich text and source mode
 
 ### Keyboard Shortcuts
 
@@ -108,7 +107,14 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 | Ctrl+I | Italic |
 | Ctrl+U | Underline |
 | Ctrl+Shift+H | Highlight |
-| Ctrl+K | Add link |
+| Ctrl+K | Insert `[]()` link syntax |
 | Ctrl+M | Toggle source/rich text view |
 | Ctrl+Alt+1-6 | Heading 1-6 |
 | Ctrl+Alt+0 | Paragraph |
+
+### Important Implementation Notes
+
+- **Portal rendering**: ContextMenu uses `createPortal` to render outside ProseMirror DOM tree, preventing React/ProseMirror DOM conflicts that cause `insertBefore` errors
+- **LiveMarkdown safety**: The decorations callback is wrapped in try-catch, returning `DecorationSet.empty` on error (cosmetic failure only)
+- **Placeholder**: Uses TipTap Placeholder extension with per-node-type function for heading placeholders ("Heading 1", "Heading 2", etc.)
+- **Link/Image insertion**: Inserts plain Markdown syntax `[]()` / `![]()` rather than using dialogs
