@@ -394,3 +394,42 @@
 .tiptap .resize-handle-right::after {
   right: 4px;
 }
+
+/* ── Live Markdown Preview ── */
+.tiptap .live-md-heading-marker {
+  color: var(--color-text-placeholder);
+  font-weight: 400;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.tiptap .live-md-mark {
+  color: var(--color-text-placeholder);
+  font-weight: 400;
+  font-style: normal;
+  text-decoration: none;
+  opacity: 0.5;
+  user-select: none;
+}
+
+/* Specific mark styles */
+.tiptap .live-md-bold {
+  font-weight: 400;
+}
+
+.tiptap .live-md-italic {
+  font-style: normal;
+}
+
+.tiptap .live-md-code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.tiptap .live-md-strike {
+  text-decoration: none;
+}
+
+.tiptap .live-md-highlight {
+  background: none;
+}

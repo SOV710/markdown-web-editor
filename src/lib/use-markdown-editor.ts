@@ -21,6 +21,7 @@ import {
   SlashCommand,
   HeadingPlaceholder,
   Highlight,
+  LiveMarkdown,
 } from "@/extensions";
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
@@ -76,6 +77,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       VideoBlock,
       HeadingPlaceholder,
       Highlight,
+      LiveMarkdown,
       SlashCommand.configure({
         suggestion: slashCommandSuggestion,
       }),
