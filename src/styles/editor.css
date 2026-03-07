@@ -37,6 +37,31 @@
   line-height: 1.4;
 }
 
+.tiptap h4 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-top: 1.1em;
+  margin-bottom: 0.25em;
+  line-height: 1.4;
+}
+
+.tiptap h5 {
+  font-size: 1em;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+  line-height: 1.5;
+}
+
+.tiptap h6 {
+  font-size: 0.875em;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
 /* ── Paragraphs & inline ── */
 .tiptap p {
   margin-bottom: 0.75em;
@@ -208,6 +233,20 @@
 
 /* ── Placeholder ── */
 .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-placeholder);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* ── Heading Placeholder ── */
+.tiptap h1.is-empty::before,
+.tiptap h2.is-empty::before,
+.tiptap h3.is-empty::before,
+.tiptap h4.is-empty::before,
+.tiptap h5.is-empty::before,
+.tiptap h6.is-empty::before {
   content: attr(data-placeholder);
   color: var(--color-text-placeholder);
   pointer-events: none;

@@ -4,12 +4,10 @@ import { Extension } from "@tiptap/core";
  * 自定义快捷键扩展。
  *
  * StarterKit 已经内置了 Bold(Ctrl+B), Italic(Ctrl+I) 等常用快捷键。
- * 这里补充你需求中提到的额外快捷键：
- *   - Ctrl+Alt+1/2/3  → Heading 1/2/3
- *   - Ctrl+Alt+0      → Normal text (paragraph)
- *   - Ctrl+U           → Underline (需要单独安装 @tiptap/extension-underline)
- *
- * 后续扩展时在此文件添加即可。
+ * 这里补充额外快捷键：
+ *   - Ctrl+Alt+1/2/3/4/5/6  → Heading 1/2/3/4/5/6
+ *   - Ctrl+Alt+0            → Normal text (paragraph)
+ *   - Ctrl+U                → Underline
  */
 export const CustomKeymap = Extension.create({
   name: "customKeymap",
@@ -22,6 +20,12 @@ export const CustomKeymap = Extension.create({
         this.editor.chain().focus().toggleHeading({ level: 2 }).run(),
       "Mod-Alt-3": () =>
         this.editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      "Mod-Alt-4": () =>
+        this.editor.chain().focus().toggleHeading({ level: 4 }).run(),
+      "Mod-Alt-5": () =>
+        this.editor.chain().focus().toggleHeading({ level: 5 }).run(),
+      "Mod-Alt-6": () =>
+        this.editor.chain().focus().toggleHeading({ level: 6 }).run(),
       "Mod-Alt-0": () =>
         this.editor.chain().focus().setParagraph().run(),
       "Mod-u": () =>

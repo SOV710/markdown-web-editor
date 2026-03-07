@@ -19,6 +19,7 @@ import {
   PlantUMLBlock,
   VideoBlock,
   SlashCommand,
+  HeadingPlaceholder,
 } from "@/extensions";
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
@@ -46,7 +47,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
+        heading: { levels: [1, 2, 3, 4, 5, 6] },
         codeBlock: false,
       }),
       Placeholder.configure({ placeholder }),
@@ -72,6 +73,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       MathBlock,
       PlantUMLBlock,
       VideoBlock,
+      HeadingPlaceholder,
       SlashCommand.configure({
         suggestion: slashCommandSuggestion,
       }),
