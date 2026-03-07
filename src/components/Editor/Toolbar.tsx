@@ -1,4 +1,25 @@
 import type { Editor } from "@tiptap/react";
+import {
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  TextB,
+  TextItalic,
+  TextUnderline,
+  TextStrikethrough,
+  Code,
+  Link,
+  ListBullets,
+  ListNumbers,
+  CheckSquare,
+  Quotes,
+  CodeBlock,
+  Minus,
+  Image,
+  Table,
+  VideoCamera,
+} from "@phosphor-icons/react";
+import { ICON_SIZE } from "./icons";
 import styles from "./Editor.module.css";
 
 interface ToolbarProps {
@@ -73,7 +94,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Heading 1 (Ctrl+Alt+1)"
         disabled={disabled}
       >
-        H1
+        <TextHOne size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -81,7 +102,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Heading 2 (Ctrl+Alt+2)"
         disabled={disabled}
       >
-        H2
+        <TextHTwo size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
@@ -89,7 +110,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Heading 3 (Ctrl+Alt+3)"
         disabled={disabled}
       >
-        H3
+        <TextHThree size={ICON_SIZE} />
       </ToolbarBtn>
 
       <Divider />
@@ -101,7 +122,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Bold (Ctrl+B)"
         disabled={disabled}
       >
-        B
+        <TextB size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -109,7 +130,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Italic (Ctrl+I)"
         disabled={disabled}
       >
-        I
+        <TextItalic size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -117,7 +138,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Underline (Ctrl+U)"
         disabled={disabled}
       >
-        <span style={{ textDecoration: "underline" }}>U</span>
+        <TextUnderline size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -125,7 +146,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Strikethrough (Ctrl+Shift+S)"
         disabled={disabled}
       >
-        S
+        <TextStrikethrough size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleCode().run()}
@@ -133,7 +154,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Inline code (Ctrl+E)"
         disabled={disabled}
       >
-        {"<>"}
+        <Code size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => handleLinkClick(editor)}
@@ -141,7 +162,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Link"
         disabled={disabled}
       >
-        {"🔗"}
+        <Link size={ICON_SIZE} />
       </ToolbarBtn>
 
       <Divider />
@@ -153,7 +174,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Bullet list"
         disabled={disabled}
       >
-        •
+        <ListBullets size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -161,7 +182,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Ordered list"
         disabled={disabled}
       >
-        1.
+        <ListNumbers size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleTaskList().run()}
@@ -169,7 +190,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Task list"
         disabled={disabled}
       >
-        {"[ ]"}
+        <CheckSquare size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -177,7 +198,7 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Blockquote"
         disabled={disabled}
       >
-        "
+        <Quotes size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -185,21 +206,21 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Code block"
         disabled={disabled}
       >
-        {"{ }"}
+        <CodeBlock size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
         title="Horizontal rule"
         disabled={disabled}
       >
-        ―
+        <Minus size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => handleImageClick(editor)}
         title="Image"
         disabled={disabled}
       >
-        {"🖼️"}
+        <Image size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() =>
@@ -208,14 +229,14 @@ export function Toolbar({ editor, disabled }: ToolbarProps) {
         title="Insert table"
         disabled={disabled}
       >
-        {"⊞"}
+        <Table size={ICON_SIZE} />
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => handleVideoClick(editor)}
         title="Insert video"
         disabled={disabled}
       >
-        {"▶"}
+        <VideoCamera size={ICON_SIZE} />
       </ToolbarBtn>
     </div>
   );
