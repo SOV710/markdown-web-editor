@@ -273,3 +273,68 @@
   border-radius: var(--radius-md);
   background: #000;
 }
+
+/* ── Resizable Media (Images & Videos) ── */
+.tiptap .resizable-image,
+.tiptap .resizable-video {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin: var(--space-2) 0;
+}
+
+.tiptap .resizable-image img,
+.tiptap .resizable-video video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.tiptap .resizable-video video {
+  background: #000;
+}
+
+.tiptap .resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  cursor: ew-resize;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+
+.tiptap .resizable-image:hover .resize-handle,
+.tiptap .resizable-video:hover .resize-handle {
+  opacity: 1;
+}
+
+.tiptap .resize-handle-left {
+  left: -4px;
+}
+
+.tiptap .resize-handle-right {
+  right: -4px;
+}
+
+.tiptap .resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 40px;
+  max-height: 50%;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+.tiptap .resize-handle-left::after {
+  left: 4px;
+}
+
+.tiptap .resize-handle-right::after {
+  right: 4px;
+}
