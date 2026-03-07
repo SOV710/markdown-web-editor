@@ -12,6 +12,7 @@
 - [SourceEditor](#sourceeditor)
 - [ViewToggle](#viewtoggle)
 - [ResizeHandle](#resizehandle)
+- [icons.ts](#iconsts)
 
 ---
 
@@ -23,11 +24,15 @@
 
 **Props**:
 ```ts
-interface EditorProps {
-  content?: string;       // 初始 HTML 内容
-  placeholder?: string;   // 占位文字
-  onUpdate?: (html: string) => void;  // 内容更新回调
+interface EditorProps extends UseMarkdownEditorOptions {
   className?: string;
+}
+
+// UseMarkdownEditorOptions:
+interface UseMarkdownEditorOptions {
+  content?: string;       // 初始 Markdown 内容
+  placeholder?: string;   // 占位文字
+  onUpdate?: (markdown: string) => void;  // 内容更新回调
 }
 ```
 
@@ -37,7 +42,7 @@ interface EditorProps {
 | viewMode | "richtext" \| "source" | 当前视图模式 |
 | markdownSource | string | Markdown 源码 |
 
-**快捷键**: `Ctrl+M` 切换视图
+**快捷键**: `Ctrl+M` / `Cmd+M` 切换视图
 
 **结构**:
 ```
@@ -49,9 +54,14 @@ Editor
     ├── EditorContent (richtext 模式)
     │   ├── TableMenu
     │   ├── BubbleToolbar
-    │   └── DragHandle
+    │   └── DragHandle (DotsSixVertical 图标)
     └── SourceEditor (source 模式)
 ```
+
+**依赖**:
+- `@tiptap/react` - EditorContent
+- `@tiptap/extension-drag-handle-react` - DragHandle
+- `@phosphor-icons/react` - DotsSixVertical
 
 ---
 
@@ -71,11 +81,13 @@ interface ToolbarProps {
 
 **按钮分组**:
 
-| 组 | 按钮 |
-|------|------|
-| 标题 | H1, H2, H3 |
-| 文本样式 | B (粗体), I (斜体), U (下划线), S (删除线), <> (行内代码), 链接 |
-| 块元素 | 无序列表, 有序列表, 任务列表, 引用, 代码块, 分隔线, 图片, 表格, 视频 |
+| 组 | 按钮 | 图标 |
+|------|------|------|
+| 标题 | H1, H2, H3 | TextHOne, TextHTwo, TextHThree |
+| 文本样式 | 粗体, 斜体, 下划线, 删除线, 行内代码, 链接 | TextB, TextItalic, TextUnderline, TextStrikethrough, Code, Link |
+| 块元素 | 无序列表, 有序列表, 任务列表, 引用, 代码块, 分隔线, 图片, 表格, 视频 | ListBullets, ListNumbers, CheckSquare, Quotes, CodeBlock, Minus, Image, Table, VideoCamera |
+
+**图标尺寸**: 18px (`ICON_SIZE`)
 
 ---
 
@@ -93,10 +105,19 @@ interface BubbleToolbarProps {
 ```
 
 **显示条件**:
-- 有文本选中
-- 非代码块、图片、数学公式、PlantUML、视频块
+- 有文本选中 (`from !== to`)
+- 非以下块类型:
+  - codeBlock
+  - image
+  - mathBlock
+  - plantumlBlock
+  - videoBlock
 
-**按钮**: B, I, U, S, Code, Link
+**按钮**: Bold, Italic, Underline, Strikethrough, Code, Link
+
+**图标尺寸**: 16px (`ICON_SIZE_SM`)
+
+**样式**: 深色玻璃效果 (backdrop-filter blur)
 
 ---
 
@@ -113,16 +134,22 @@ interface TableMenuProps {
 }
 ```
 
-**显示条件**: 光标在表格内
+**显示条件**: 光标在表格内 (`editor.isActive("table")`)
 
 **操作**:
-| 按钮 | 功能 |
-|------|------|
-| + Col | 右侧添加列 |
-| - Col | 删除当前列 |
-| + Row | 下方添加行 |
-| - Row | 删除当前行 |
-| Delete | 删除整个表格 |
+| 按钮 | 图标 | 功能 |
+|------|------|------|
+| Row | RowsPlusTop | 上方添加行 |
+| Row | RowsPlusBottom | 下方添加行 |
+| Row | Trash | 删除当前行 |
+| Col | ColumnsPlusLeft | 左侧添加列 |
+| Col | ColumnsPlusRight | 右侧添加列 |
+| Col | Trash | 删除当前列 |
+| Table | Trash | 删除整个表格 |
+
+**图标尺寸**: 14px (`TABLE_ICON_SIZE`)
+
+**样式**: 深色玻璃效果
 
 ---
 
@@ -147,13 +174,24 @@ interface SlashMenuRef {
 }
 ```
 
+**分组显示**:
+| 组 | 标签 |
+|------|------|
+| text | Text |
+| list | Lists |
+| block | Blocks |
+| media | Media |
+| advanced | Advanced |
+
 **键盘导航**:
 | 按键 | 动作 |
 |------|------|
-| ↑ | 上一项 |
-| ↓ | 下一项 |
+| ArrowUp | 上一项 |
+| ArrowDown | 下一项 |
 | Enter | 执行命令 |
 | Escape | 关闭菜单 |
+
+**样式**: 深色玻璃效果，带分组标题和分隔线
 
 ---
 
@@ -161,7 +199,7 @@ interface SlashMenuRef {
 
 **文件**: `SourceEditor.tsx`
 
-**功能**: Markdown 源码编辑器
+**功能**: CodeMirror 6 Markdown 源码编辑器
 
 **Props**:
 ```ts
@@ -172,10 +210,18 @@ interface SourceEditorProps {
 }
 ```
 
-**特性**:
-- 自动调整高度
-- 等宽字体
-- 禁用拼写检查
+**CodeMirror 配置**:
+- `lineNumbers()` - 行号
+- `highlightActiveLine()` - 高亮当前行
+- `history()` - 撤销/重做
+- `markdown()` - Markdown 语言支持
+- `syntaxHighlighting()` - 语法高亮
+
+**样式**:
+- 字体: `var(--font-mono)`
+- 字号: 14px
+- 行高: 1.6
+- 背景: `var(--color-bg-subtle)`
 
 ---
 
@@ -193,11 +239,18 @@ interface ViewToggleProps {
 }
 ```
 
+**导出类型**:
+```ts
+export type ViewMode = "richtext" | "source";
+```
+
 **按钮**:
-| 图标 | 模式 |
-|------|------|
-| 横线图标 | Rich Text |
-| 尖括号图标 | Source |
+| 图标 | 模式 | 标题 |
+|------|------|------|
+| TextAlignLeft | richtext | Rich Text View |
+| BracketsAngle | source | Markdown Source |
+
+**图标尺寸**: 16px
 
 ---
 
@@ -218,7 +271,27 @@ interface ResizeHandleProps {
 
 **范围**: 10% - 100%
 
-**样式**:
-- 默认隐藏
-- 鼠标悬停显示左右把手
-- 拖动时显示蓝色指示条
+**交互**:
+- 左右两侧拖动手柄
+- 拖动时改变 body cursor 为 `ew-resize`
+- 乘数因子 2 (双向调整)
+
+---
+
+## icons.ts
+
+**文件**: `icons.ts`
+
+**功能**: 图标尺寸配置
+
+**导出常量**:
+```ts
+/** 工具栏按钮默认尺寸 */
+export const ICON_SIZE = 18;
+
+/** 浮动菜单较小尺寸 */
+export const ICON_SIZE_SM = 16;
+
+/** 默认图标粗细 */
+export const ICON_WEIGHT = "regular" as const;
+```

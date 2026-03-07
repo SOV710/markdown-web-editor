@@ -27,7 +27,9 @@
 
 **功能**: 下划线文本修饰
 
-**快捷键**: `Ctrl+U`
+**来源**: 直接导出 `@tiptap/extension-underline`
+
+**快捷键**: `Ctrl+U` (通过 CustomKeymap)
 
 **用法**:
 ```ts
@@ -44,12 +46,14 @@ editor.chain().focus().toggleUnderline().run()
 
 **功能**: 超链接
 
+**来源**: 配置 `@tiptap/extension-link`
+
 **配置**:
-| 选项        | 值    | 说明                  |
-|-------------|-------|-----------------------|
-| openOnClick | false | 编辑模式下点击不跳转  |
-| autolink    | true  | 自动识别 URL          |
-| linkOnPaste | true  | 粘贴 URL 自动转为链接 |
+| 选项 | 值 | 说明 |
+|------|------|------|
+| openOnClick | false | 编辑模式下点击不跳转 |
+| autolink | true | 自动识别 URL |
+| linkOnPaste | true | 粘贴 URL 自动转为链接 |
 
 **用法**:
 ```ts
@@ -69,7 +73,7 @@ editor.chain().focus().unsetLink().run()
 
 **属性**:
 | 属性 | 类型 | 默认值 | 说明 |
-|------|------|------|------|
+|------|------|--------|------|
 | src | string | null | 图片 URL |
 | alt | string | null | 替代文本 |
 | title | string | null | 标题 |
@@ -82,6 +86,11 @@ editor.chain().focus().unsetLink().run()
   <img src="..." />
   <div class="resize-handle resize-handle-right"></div>
 </div>
+```
+
+**Markdown 序列化**: 原始 HTML 格式
+```html
+<img src="..." alt="..." title="..." width="50%">
 ```
 
 **用法**:
@@ -101,10 +110,24 @@ editor.chain().focus().setImage({ src: '...' }).run()
 
 **属性**:
 | 属性 | 类型 | 默认值 | 说明 |
-|------|------|------|------|
+|------|------|--------|------|
 | src | string | "" | 视频 URL |
 | width | number | 100 | 宽度百分比 |
 | title | string | "" | 标题 |
+
+**NodeView**: 自定义 DOM 结构
+```html
+<div class="resizable-video" style="width: {width}%">
+  <div class="resize-handle resize-handle-left"></div>
+  <video class="video-block-player" controls src="..."></video>
+  <div class="resize-handle resize-handle-right"></div>
+</div>
+```
+
+**Markdown 序列化**: 原始 HTML 格式
+```html
+<video src="..." width="50%" title="..."></video>
+```
 
 **用法**:
 ```ts
@@ -124,6 +147,13 @@ editor.commands.insertContent({
 
 **功能**: 表格编辑
 
+**来源**: 配置 `@tiptap/extension-table` 系列
+
+**配置**:
+| 选项 | 值 | 说明 |
+|------|------|------|
+| resizable | false | 禁用列宽调整 |
+
 **导出**:
 - `Table` - 表格容器
 - `TableRow` - 行
@@ -134,7 +164,10 @@ editor.commands.insertContent({
 ```ts
 editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
 editor.chain().focus().addColumnAfter().run()
+editor.chain().focus().addRowBefore().run()
 editor.chain().focus().deleteRow().run()
+editor.chain().focus().deleteColumn().run()
+editor.chain().focus().deleteTable().run()
 ```
 
 ---
@@ -147,8 +180,10 @@ editor.chain().focus().deleteRow().run()
 
 **功能**: 带复选框的任务列表
 
+**来源**: 配置 `@tiptap/extension-task-list` 和 `@tiptap/extension-task-item`
+
 **配置**:
-- `nested: true` - 支持嵌套
+- TaskItem: `nested: true` - 支持嵌套
 
 **用法**:
 ```ts
@@ -165,14 +200,15 @@ editor.chain().focus().toggleTaskList().run()
 
 **功能**: 语法高亮代码块
 
-**依赖**: lowlight
+**来源**: 配置 `@tiptap/extension-code-block-lowlight`
 
-**预注册语言**:
-- javascript, typescript
-- python, go, rust
-- html, css
-- json, yaml, markdown
-- bash, sql
+**依赖**: lowlight (使用 `common` 语言包)
+
+**common 语言包含**:
+- JavaScript, TypeScript, Python, Java, C/C++
+- Go, Rust, Ruby, PHP, Swift, Kotlin
+- HTML, CSS, JSON, YAML, Markdown
+- Bash, SQL, XML 等
 
 **用法**:
 ```ts
@@ -189,14 +225,23 @@ editor.chain().focus().toggleCodeBlock().run()
 
 **功能**: 行内数学公式
 
-**语法**: `$LaTeX$`
+**Markdown 语法**: `$LaTeX$`
 
 **属性**:
 | 属性 | 类型 | 说明 |
 |------|------|------|
 | latex | string | LaTeX 源码 |
 
-**NodeView**: 点击显示编辑弹窗，使用 KaTeX 渲染
+**NodeView**:
+- KaTeX 渲染显示
+- 点击弹出 prompt 编辑
+
+**InputRule**: 输入 `$...$` 自动转换
+
+**Markdown 序列化**:
+```
+$E = mc^2$
+```
 
 ---
 
@@ -208,14 +253,24 @@ editor.chain().focus().toggleCodeBlock().run()
 
 **功能**: 块级数学公式
 
-**语法**:
+**Markdown 语法**:
 ```
 $$
 LaTeX
 $$
 ```
 
-**NodeView**: 上方 textarea 输入，下方实时 KaTeX 预览
+**属性**:
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| latex | string | LaTeX 源码 |
+
+**NodeView**:
+- 上方 textarea 输入框
+- 下方实时 KaTeX 预览
+- Escape 键退出编辑
+
+**InputRule**: 输入 `$$` 自动创建
 
 ---
 
@@ -228,19 +283,36 @@ $$
 **功能**: PlantUML 图表
 
 **属性**:
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| source | string | PlantUML 源码 |
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| source | string | `@startuml\n\n@enduml` | PlantUML 源码 |
 
-**渲染**: 编码后请求 `https://www.plantuml.com/plantuml/svg/{encoded}`
+**渲染**:
+- 使用 plantuml-encoder 编码
+- 请求 `https://www.plantuml.com/plantuml/svg/{encoded}`
 
 **防抖**: 500ms
+
+**NodeView**:
+- 上方 textarea 输入框
+- 下方 SVG 预览图
+- Escape 键退出编辑
+
+**InputRule**: 输入 ` ```plantuml ` 自动创建
+
+**Markdown 序列化**:
+```
+```plantuml
+@startuml
+Alice -> Bob: Hello
+@enduml
+```
 
 ---
 
 ## SlashCommand
 
-**文件**: `slash-command.ts`
+**文件**: `slash-command.tsx`
 
 **类型**: Extension
 
@@ -248,21 +320,30 @@ $$
 
 **触发**: 输入 `/`
 
-**命令列表**:
-| 命令 | 说明 |
+**命令分组**:
+
+| 组 | 命令 |
 |------|------|
-| Heading 1/2/3 | 插入标题 |
-| Bullet List | 无序列表 |
-| Numbered List | 有序列表 |
-| Task List | 任务列表 |
-| Blockquote | 引用块 |
-| Code Block | 代码块 |
-| Horizontal Rule | 分隔线 |
-| Table | 3x3 表格 |
-| Image | 图片 |
-| Video | 视频 |
-| Math Block | 数学公式块 |
-| PlantUML | UML 图表 |
+| text | Heading 1, Heading 2, Heading 3 |
+| list | Bullet List, Numbered List, Task List |
+| block | Blockquote, Code Block, Horizontal Rule |
+| media | Table, Image, Video |
+| advanced | Math Block, PlantUML |
+
+**图标**: Phosphor Icons (20px)
+
+**导出类型**:
+```ts
+export type SlashCommandGroup = "text" | "list" | "block" | "media" | "advanced";
+
+export interface SlashCommandItem {
+  title: string;
+  description: string;
+  icon: ReactNode;
+  group: SlashCommandGroup;
+  command: (props: { editor: Editor; range: Range }) => void;
+}
+```
 
 ---
 
@@ -276,9 +357,11 @@ $$
 
 **快捷键**:
 | 快捷键 | 动作 |
-|------|------|
-| Ctrl+Alt+1 | Heading 1 |
-| Ctrl+Alt+2 | Heading 2 |
-| Ctrl+Alt+3 | Heading 3 |
-| Ctrl+Alt+0 | 普通段落 |
-| Ctrl+U | 下划线 |
+|--------|------|
+| Mod-Alt-1 | Heading 1 |
+| Mod-Alt-2 | Heading 2 |
+| Mod-Alt-3 | Heading 3 |
+| Mod-Alt-0 | 普通段落 |
+| Mod-u | 下划线 |
+
+注: `Mod` = Ctrl (Windows/Linux) 或 Cmd (Mac)

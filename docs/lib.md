@@ -5,8 +5,7 @@
 ## 目录
 
 - [useMarkdownEditor](#usemarkdowneditor)
-- [markdown-converter](#markdown-converter)
-- [slash-command-suggestion](#slash-command-suggestion)
+- [slashCommandSuggestion](#slashcommandsuggestion)
 
 ---
 
@@ -24,23 +23,31 @@ function useMarkdownEditor(options?: UseMarkdownEditorOptions): Editor | null
 **Options**:
 ```ts
 interface UseMarkdownEditorOptions {
-  content?: string;       // 初始 HTML 内容
-  placeholder?: string;   // 占位符文字
-  onUpdate?: (html: string) => void;  // 内容变更回调
+  /** 初始内容 (Markdown string) */
+  content?: string;
+  /** placeholder 提示文字 */
+  placeholder?: string;
+  /** 内容变更回调 */
+  onUpdate?: (markdown: string) => void;
 }
 ```
 
 **默认内容**:
-```html
-<h2>Welcome to the Editor</h2>
-<p>Start typing, or press <code>/</code> for commands…</p>
+```markdown
+## Welcome to the Editor
+
+Start typing, or press `/` for commands…
 ```
 
+**默认 placeholder**: `Type '/' for commands…`
+
 **注册的扩展**:
+
 | 扩展 | 配置 |
 |------|------|
 | StarterKit | heading: { levels: [1,2,3] }, codeBlock: false |
 | Placeholder | placeholder 文字 |
+| Markdown | html: true, transformPastedText: true, transformCopiedText: true |
 | CustomKeymap | - |
 | Underline | - |
 | TaskList, TaskItem | - |
@@ -51,67 +58,44 @@ interface UseMarkdownEditorOptions {
 | MathInline, MathBlock | - |
 | PlantUMLBlock | - |
 | VideoBlock | - |
-| SlashCommand | suggestion 配置 |
+| SlashCommand | suggestion: slashCommandSuggestion |
+
+**editorProps**:
+```ts
+{
+  attributes: {
+    spellcheck: "false"
+  }
+}
+```
+
+**onUpdate 回调**:
+```ts
+onUpdate: ({ editor }) => {
+  const storage = editor.storage as { markdown: MarkdownStorage };
+  onUpdate?.(storage.markdown.getMarkdown());
+}
+```
 
 **用法**:
 ```tsx
-const editor = useMarkdownEditor({
-  content: '<p>Hello</p>',
-  onUpdate: (html) => console.log(html)
-});
+import { useMarkdownEditor } from "@/lib/use-markdown-editor";
+
+function MyEditor() {
+  const editor = useMarkdownEditor({
+    content: "# Hello World",
+    onUpdate: (markdown) => console.log(markdown),
+  });
+
+  if (!editor) return null;
+
+  return <EditorContent editor={editor} />;
+}
 ```
 
 ---
 
-## markdown-converter
-
-**文件**: `markdown-converter.ts`
-
-**功能**: HTML 与 Markdown 双向转换
-
-### htmlToMarkdown
-
-**签名**:
-```ts
-function htmlToMarkdown(html: string): string
-```
-
-**依赖**: turndown
-
-**配置**:
-| 选项 | 值 |
-|------|------|
-| headingStyle | atx (`#` 风格) |
-| codeBlockStyle | fenced (三个反引号) |
-| bulletListMarker | `-` |
-
-**自定义规则**:
-| 规则 | 处理 |
-|------|------|
-| taskListItem | `- [x]` / `- [ ]` 格式 |
-| fencedCodeBlock | 保留语言标识 |
-| mathBlock | `$$..$$` 格式 |
-| mathInline | `$...$` 格式 |
-
-### markdownToHtml
-
-**签名**:
-```ts
-function markdownToHtml(markdown: string): string
-```
-
-**依赖**: markdown-it
-
-**配置**:
-| 选项 | 值 |
-|------|------|
-| html | true |
-| linkify | true |
-| typographer | false |
-
----
-
-## slash-command-suggestion
+## slashCommandSuggestion
 
 **文件**: `slash-command-suggestion.tsx`
 
@@ -122,12 +106,34 @@ function markdownToHtml(markdown: string): string
 const slashCommandSuggestion: Partial<SuggestionOptions<SlashCommandItem>>
 ```
 
-**配置项**:
+### items
 
-| 属性 | 说明 |
-|------|------|
-| items | 根据查询过滤命令列表 |
-| render | 使用 ReactRenderer + Tippy.js 渲染菜单 |
+根据查询过滤命令列表:
+```ts
+items: ({ query }) => {
+  return slashCommandItems.filter((item) =>
+    item.title.toLowerCase().startsWith(query.toLowerCase())
+  );
+}
+```
+
+### render
+
+使用 ReactRenderer + Tippy.js 渲染菜单:
+
+```ts
+render: () => {
+  let component: ReactRenderer<SlashMenuRef> | null = null;
+  let popup: TippyInstance[] | null = null;
+
+  return {
+    onStart: (props) => { ... },
+    onUpdate: (props) => { ... },
+    onKeyDown: (props) => { ... },
+    onExit: () => { ... },
+  };
+}
+```
 
 **Tippy 配置**:
 | 选项 | 值 |
@@ -135,11 +141,20 @@ const slashCommandSuggestion: Partial<SuggestionOptions<SlashCommandItem>>
 | placement | bottom-start |
 | trigger | manual |
 | interactive | true |
-| getReferenceClientRect | 获取光标位置 |
+| showOnCreate | true |
+| appendTo | document.body |
 
 **渲染流程**:
 1. 用户输入 `/`
 2. Suggestion API 触发 `onStart`
-3. 创建 ReactRenderer 渲染 SlashMenu
-4. 创建 Tippy 实例定位弹窗
-5. 用户选择命令后调用 `onExit` 清理
+3. 创建 ReactRenderer 渲染 SlashMenu 组件
+4. 创建 Tippy 实例，使用 `clientRect` 定位弹窗
+5. 用户输入时 `onUpdate` 更新过滤结果和位置
+6. 键盘事件通过 `onKeyDown` 传递给 SlashMenu
+7. 用户选择命令或按 Escape 后 `onExit` 清理
+
+**依赖**:
+- `@tiptap/react` - ReactRenderer
+- `tippy.js` - 弹出定位
+- `@/components/Editor/SlashMenu` - 菜单组件
+- `@/extensions/slash-command` - 命令列表

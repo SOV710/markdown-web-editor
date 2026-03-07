@@ -9,37 +9,40 @@ pnpm install      # Install dependencies
 pnpm dev          # Start dev server (Vite)
 pnpm build        # TypeScript check + Vite production build
 pnpm preview      # Preview production build
+pnpm lint         # Run ESLint
 ```
 
 No test framework is currently configured.
 
 ## Architecture
 
-This is a Markdown editor built with TipTap v3 (ProseMirror wrapper) + React 19 + TypeScript.
+This is a Markdown editor built with TipTap 3.20.1 (ProseMirror wrapper) + React 19 + TypeScript 5.9.
 
 ### Core Data Flow
 
 The editor uses **tiptap-markdown** for bidirectional Markdown conversion, operating directly on the ProseMirror document model (no HTML intermediate):
 
 ```
-Rich Text Mode (TipTap)  ←→  Markdown String (tiptap-markdown)  ←→  Source Mode (CodeMirror 6)
+Rich Text Mode (TipTap)  <->  Markdown String (tiptap-markdown)  <->  Source Mode (CodeMirror 6)
 ```
 
-- **Rich → Source**: `editor.storage.markdown.getMarkdown()`
-- **Source → Rich**: `editor.commands.setContent(markdownString)`
+- **Rich -> Source**: `editor.storage.markdown.getMarkdown()`
+- **Source -> Rich**: `editor.commands.setContent(markdownString)`
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
 | `src/lib/use-markdown-editor.ts` | Main hook that configures TipTap with all extensions |
+| `src/lib/slash-command-suggestion.tsx` | Slash command Suggestion API config with Tippy.js |
 | `src/components/Editor/Editor.tsx` | Root component managing dual-view (rich text / source) |
 | `src/components/Editor/SourceEditor.tsx` | CodeMirror 6 Markdown editor for source mode |
+| `src/components/Editor/icons.ts` | Phosphor Icons sizing conventions (ICON_SIZE=18, ICON_SIZE_SM=16) |
 | `src/extensions/index.ts` | Barrel export for all custom TipTap extensions |
 
 ### Extension Pattern
 
-Custom extensions in `src/extensions/` follow this pattern for Markdown round-trip:
+Custom extensions in `src/extensions/` follow this pattern for Markdown round-trip via tiptap-markdown:
 
 ```typescript
 addStorage() {
@@ -47,6 +50,11 @@ addStorage() {
     markdown: {
       serialize(state: MarkdownSerializerState, node: ProseMirrorNode) {
         // Output Markdown syntax
+        state.write("```plantuml\n");
+        state.text(node.attrs.source, false);
+        state.ensureNewLine();
+        state.write("```");
+        state.closeBlock(node);
       },
       parse: {
         setup(markdownit: MarkdownItInstance) {
@@ -62,13 +70,26 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 
 ### Custom Node Types
 
-- **MathInline/MathBlock**: KaTeX rendering, serializes as `$...$` / `$$...$$`
-- **PlantUMLBlock**: Encodes to plantuml.com SVG, serializes as ` ```plantuml ` fence
-- **Image/VideoBlock**: Resizable media with custom NodeView, serializes as raw HTML to preserve width
-- **SlashCommand**: `/` triggered command palette using TipTap Suggestion API
+| Node | Syntax | Description |
+|------|--------|-------------|
+| MathInline | `$...$` | KaTeX inline math, click to edit |
+| MathBlock | `$$...$$` | KaTeX block math with textarea + live preview |
+| PlantUMLBlock | ` ```plantuml ` | Encodes to plantuml.com SVG, 500ms debounce |
+| Image | raw HTML | Resizable image with custom NodeView (10-100% width) |
+| VideoBlock | raw HTML | Resizable video player with custom NodeView |
+| SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 
 ### Styling
 
-- CSS variables defined in `src/styles/editor.css`
+- CSS variables defined in `src/styles/reset.css`
+- Editor content styles in `src/styles/editor.css` (target `.tiptap` class)
+- Code highlighting in `src/styles/hljs.css` (GitHub Light theme)
+- KaTeX math styles in `src/styles/katex.css`
 - Component styles use CSS Modules (`*.module.css`)
-- Editor content styles target `.ProseMirror` class
+- Icons use Phosphor Icons (`@phosphor-icons/react`)
+
+### UI Theme
+
+- Dark toolbar (#1c1c1e) with glass effect (backdrop-filter blur)
+- White editor area with accent blue (#2563eb)
+- Linear-inspired design with 150ms ease transitions
