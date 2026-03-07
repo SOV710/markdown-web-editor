@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
 import {
   TextB,
@@ -123,12 +124,10 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
   // Early return if not ready
   if (!editor || !isOpen) return null;
 
-  // Safe wrapper for isActive that won't throw
   const safeIsActive = (name: string): boolean => {
     try {
       return editor.isActive(name);
-    } catch (error) {
-      console.error("safeIsActive error:", name, error);
+    } catch {
       return false;
     }
   };
@@ -410,7 +409,8 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
 
   const sections = [formatSection, insertSection, clipboardSection];
 
-  return (
+  // Use portal to render outside ProseMirror DOM tree, avoiding React/ProseMirror conflicts
+  return createPortal(
     <div
       ref={menuRef}
       className={styles.menu}
@@ -441,6 +441,7 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
           )}
         </div>
       ))}
-    </div>
+    </div>,
+    document.body
   );
 }
