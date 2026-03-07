@@ -39,108 +39,113 @@ export const LiveMarkdown = Extension.create({
         key: liveMarkdownPluginKey,
         props: {
           decorations: (state) => {
-            const { doc, selection } = state;
-            const decorations: Decoration[] = [];
-            const { $from } = selection;
+            try {
+              const { doc, selection } = state;
+              const decorations: Decoration[] = [];
+              const { $from } = selection;
 
-            // Get cursor position info
-            const cursorPos = $from.pos;
+              // Get cursor position info
+              const cursorPos = $from.pos;
 
-            // Check if we're in a heading
-            for (let depth = $from.depth; depth >= 0; depth--) {
-              const node = $from.node(depth);
+              // Check if we're in a heading
+              for (let depth = $from.depth; depth >= 0; depth--) {
+                const node = $from.node(depth);
 
-              if (node.type.name === "heading") {
-                const level = node.attrs.level as number;
-                const marker = HEADING_MARKERS[level];
+                if (node.type.name === "heading") {
+                  const level = node.attrs.level as number;
+                  const marker = HEADING_MARKERS[level];
 
-                if (marker) {
-                  const nodeStart = $from.start(depth);
+                  if (marker) {
+                    const nodeStart = $from.start(depth);
 
-                  // Add decoration to show the heading marker
-                  decorations.push(
-                    Decoration.widget(nodeStart, () => {
-                      const span = document.createElement("span");
-                      span.className = "live-md-heading-marker";
-                      span.textContent = marker;
-                      return span;
-                    })
-                  );
+                    // Add decoration to show the heading marker
+                    decorations.push(
+                      Decoration.widget(nodeStart, () => {
+                        const span = document.createElement("span");
+                        span.className = "live-md-heading-marker";
+                        span.textContent = marker;
+                        return span;
+                      })
+                    );
+                  }
+                  break;
                 }
-                break;
               }
-            }
 
-            // Find all marks at cursor position and show their syntax
-            const cursorMarks = $from.marks();
+              // Find all marks at cursor position and show their syntax
+              const cursorMarks = $from.marks();
 
-            if (cursorMarks.length > 0) {
-              // Find the text range with the same marks
-              const parent = $from.parent;
-              const parentStart = $from.start();
-              const markEnd = parentStart + parent.content.size;
+              if (cursorMarks.length > 0) {
+                // Find the text range with the same marks
+                const parent = $from.parent;
+                const parentStart = $from.start();
+                const markEnd = parentStart + parent.content.size;
 
-              // Find the exact range of the current marked text
-              doc.nodesBetween(parentStart, markEnd, (node, pos) => {
-                if (node.isText) {
-                  const nodeEnd = pos + node.nodeSize;
+                // Find the exact range of the current marked text
+                doc.nodesBetween(parentStart, markEnd, (node, pos) => {
+                  if (node.isText) {
+                    const nodeEnd = pos + node.nodeSize;
 
-                  // Check if this text node contains the cursor
-                  if (cursorPos >= pos && cursorPos <= nodeEnd) {
-                    const nodeMarks = node.marks;
+                    // Check if this text node contains the cursor
+                    if (cursorPos >= pos && cursorPos <= nodeEnd) {
+                      const nodeMarks = node.marks;
 
-                    // Check each mark at cursor and add decorations
-                    for (const mark of cursorMarks) {
-                      const markType = mark.type.name;
-                      const syntax = SYNTAX_MARKERS[markType];
+                      // Check each mark at cursor and add decorations
+                      for (const mark of cursorMarks) {
+                        const markType = mark.type.name;
+                        const syntax = SYNTAX_MARKERS[markType];
 
-                      if (syntax && nodeMarks.some((m) => m.type === mark.type)) {
-                        // Find the extent of this mark
-                        let mStart = pos;
-                        let mEnd = nodeEnd;
+                        if (syntax && nodeMarks.some((m) => m.type === mark.type)) {
+                          // Find the extent of this mark
+                          let mStart = pos;
+                          let mEnd = nodeEnd;
 
-                        // Look backwards for mark start
-                        doc.nodesBetween(parentStart, pos, (n, p) => {
-                          if (n.isText && n.marks.some((m) => m.type === mark.type)) {
-                            mStart = p;
-                          }
-                        });
+                          // Look backwards for mark start
+                          doc.nodesBetween(parentStart, pos, (n, p) => {
+                            if (n.isText && n.marks.some((m) => m.type === mark.type)) {
+                              mStart = p;
+                            }
+                          });
 
-                        // Look forwards for mark end
-                        doc.nodesBetween(pos, markEnd, (n, p) => {
-                          if (n.isText && n.marks.some((m) => m.type === mark.type)) {
-                            mEnd = p + n.nodeSize;
-                          }
-                        });
+                          // Look forwards for mark end
+                          doc.nodesBetween(pos, markEnd, (n, p) => {
+                            if (n.isText && n.marks.some((m) => m.type === mark.type)) {
+                              mEnd = p + n.nodeSize;
+                            }
+                          });
 
-                        // Add prefix widget
-                        decorations.push(
-                          Decoration.widget(mStart, () => {
-                            const span = document.createElement("span");
-                            span.className = `live-md-mark live-md-${markType}`;
-                            span.textContent = syntax.prefix;
-                            return span;
-                          })
-                        );
+                          // Add prefix widget
+                          decorations.push(
+                            Decoration.widget(mStart, () => {
+                              const span = document.createElement("span");
+                              span.className = `live-md-mark live-md-${markType}`;
+                              span.textContent = syntax.prefix;
+                              return span;
+                            })
+                          );
 
-                        // Add suffix widget
-                        decorations.push(
-                          Decoration.widget(mEnd, () => {
-                            const span = document.createElement("span");
-                            span.className = `live-md-mark live-md-${markType}`;
-                            span.textContent = syntax.suffix;
-                            return span;
-                          })
-                        );
+                          // Add suffix widget
+                          decorations.push(
+                            Decoration.widget(mEnd, () => {
+                              const span = document.createElement("span");
+                              span.className = `live-md-mark live-md-${markType}`;
+                              span.textContent = syntax.suffix;
+                              return span;
+                            })
+                          );
+                        }
                       }
                     }
                   }
-                }
-                return true;
-              });
-            }
+                  return true;
+                });
+              }
 
-            return DecorationSet.create(doc, decorations);
+              return DecorationSet.create(doc, decorations);
+            } catch {
+              // Decoration failure is cosmetic, not data-loss - return empty set
+              return DecorationSet.empty;
+            }
           },
         },
       }),
