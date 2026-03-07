@@ -73,8 +73,9 @@
 .tiptap pre {
   font-family: var(--font-mono);
   font-size: 0.875em;
-  background: var(--color-bg-subtle);
+  background: #f6f7f9;
   border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border-strong);
   border-radius: var(--radius-md);
   padding: var(--space-4);
   margin: var(--space-4) 0;
@@ -90,10 +91,13 @@
 
 /* ── Blockquote ── */
 .tiptap blockquote {
-  border-left: 3px solid var(--color-accent);
-  padding-left: var(--space-4);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-3) var(--space-4);
   margin: var(--space-4) 0;
+  background: linear-gradient(to right, rgba(37, 99, 235, 0.04), transparent);
   color: var(--color-text-secondary);
+  font-style: italic;
 }
 
 /* ── Lists ── */
@@ -215,8 +219,8 @@
 .tiptap .plantuml-block {
   margin: var(--space-4) 0;
   padding: var(--space-3);
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
+  background: rgba(22, 163, 74, 0.03);
+  border: 1px solid rgba(22, 163, 74, 0.12);
   border-radius: var(--radius-md);
 }
 
@@ -232,11 +236,13 @@
   color: var(--color-text);
   resize: vertical;
   min-height: 80px;
+  transition: box-shadow 150ms ease;
 }
 
 .tiptap .plantuml-block-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: rgba(22, 163, 74, 0.4);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
 }
 
 .tiptap .plantuml-block-preview {
@@ -246,6 +252,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
 }
 
 .tiptap .plantuml-block-img {
@@ -254,11 +263,12 @@
 }
 
 .tiptap .plantuml-error {
-  color: #d73a49;
+  color: #dc2626;
   font-family: var(--font-mono);
   font-size: 0.875em;
   padding: var(--space-1) var(--space-2);
-  background: #ffeef0;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.15);
   border-radius: var(--radius-sm);
 }
 

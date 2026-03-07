@@ -24,8 +24,8 @@
 .tiptap .math-block {
   margin: var(--space-4) 0;
   padding: var(--space-3);
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
+  background: rgba(37, 99, 235, 0.03);
+  border: 1px solid rgba(37, 99, 235, 0.12);
   border-radius: var(--radius-md);
 }
 
@@ -41,11 +41,13 @@
   color: var(--color-text);
   resize: vertical;
   min-height: 60px;
+  transition: box-shadow 150ms ease;
 }
 
 .tiptap .math-block-input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .tiptap .math-block-preview {
@@ -56,10 +58,11 @@
 
 /* Error state */
 .tiptap .math-error {
-  color: #d73a49;
+  color: #dc2626;
   font-family: var(--font-mono);
   font-size: 0.875em;
   padding: var(--space-1) var(--space-2);
-  background: #ffeef0;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.15);
   border-radius: var(--radius-sm);
 }
