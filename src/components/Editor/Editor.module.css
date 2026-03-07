@@ -116,6 +116,7 @@
 
 /* Drag handle */
 .dragHandle {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,16 +127,37 @@
   border: none;
   color: var(--color-text-placeholder);
   cursor: grab;
-  transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
-  opacity: 0;
+  transition: background 150ms ease, color 150ms ease;
 }
 
 .dragHandle:hover {
   background: var(--color-bg-subtle);
   color: var(--color-text-secondary);
-  opacity: 1;
 }
 
 .dragHandle:active {
   cursor: grabbing;
+}
+
+/* Tooltip */
+.dragHandle::after {
+  content: "Drag to move";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  background: var(--color-toolbar-bg);
+  color: var(--color-toolbar-text-active);
+  font-size: 11px;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+  transition-delay: 300ms;
+}
+
+.dragHandle:hover::after {
+  opacity: 1;
 }
