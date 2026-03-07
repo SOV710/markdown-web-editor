@@ -1,4 +1,5 @@
 import { EditorContent } from "@tiptap/react";
+import { DragHandle } from "@tiptap/extension-drag-handle-react";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
 import { Toolbar } from "./Toolbar";
@@ -23,6 +24,24 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
         <EditorContent editor={editor} />
         {editor && <TableMenu editor={editor} />}
         {editor && <BubbleToolbar editor={editor} />}
+        {editor && (
+          <DragHandle editor={editor} className={styles.dragHandle}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="5" cy="4" r="1.5" />
+              <circle cx="11" cy="4" r="1.5" />
+              <circle cx="5" cy="8" r="1.5" />
+              <circle cx="11" cy="8" r="1.5" />
+              <circle cx="5" cy="12" r="1.5" />
+              <circle cx="11" cy="12" r="1.5" />
+            </svg>
+          </DragHandle>
+        )}
       </div>
     </div>
   );
