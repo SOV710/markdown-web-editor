@@ -1,6 +1,7 @@
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Markdown, type MarkdownStorage } from "tiptap-markdown";
 import {
   CustomKeymap,
   Underline,
@@ -22,17 +23,17 @@ import {
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
 export interface UseMarkdownEditorOptions {
-  /** 初始内容 (HTML string) */
+  /** 初始内容 (Markdown string) */
   content?: string;
   /** placeholder 提示文字 */
   placeholder?: string;
   /** 内容变更回调 */
-  onUpdate?: (html: string) => void;
+  onUpdate?: (markdown: string) => void;
 }
 
-const DEFAULT_CONTENT = `
-<h2>Welcome to the Editor</h2>
-<p>Start typing, or press <code>/</code> for commands…</p>
+const DEFAULT_CONTENT = `## Welcome to the Editor
+
+Start typing, or press \`/\` for commands…
 `;
 
 export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
@@ -49,6 +50,13 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
         codeBlock: false,
       }),
       Placeholder.configure({ placeholder }),
+      // tiptap-markdown: enables Markdown serialization/parsing directly on ProseMirror doc
+      // html: true allows raw HTML in Markdown (needed for video/image with attributes)
+      Markdown.configure({
+        html: true,
+        transformPastedText: true,
+        transformCopiedText: true,
+      }),
       CustomKeymap,
       Underline,
       TaskList,
@@ -70,7 +78,9 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
     ],
     content,
     onUpdate: ({ editor: e }) => {
-      onUpdate?.(e.getHTML());
+      // tiptap-markdown adds `markdown` to storage at runtime
+      const storage = e.storage as unknown as { markdown: MarkdownStorage };
+      onUpdate?.(storage.markdown.getMarkdown());
     },
     editorProps: {
       attributes: {
