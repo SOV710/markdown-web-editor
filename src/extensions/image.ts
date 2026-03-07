@@ -1,4 +1,13 @@
 import { Node, mergeAttributes } from "@tiptap/core";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+
+// Types for tiptap-markdown serialization
+interface MarkdownSerializerState {
+  write(text: string): void;
+  text(text: string, escape?: boolean): void;
+  ensureNewLine(): void;
+  closeBlock(node: ProseMirrorNode): void;
+}
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -35,6 +44,22 @@ export const Image = Node.create({
     return [
       {
         tag: "img[src]",
+        getAttrs: (element) => {
+          const el = element as HTMLImageElement;
+          const widthAttr = el.getAttribute("width");
+          let width = 100;
+          if (widthAttr) {
+            // Handle both "50%" and "50" formats
+            const parsed = parseInt(widthAttr.replace("%", ""), 10);
+            if (!isNaN(parsed)) width = parsed;
+          }
+          return {
+            src: el.getAttribute("src"),
+            alt: el.getAttribute("alt"),
+            title: el.getAttribute("title"),
+            width,
+          };
+        },
       },
     ];
   },
@@ -46,6 +71,33 @@ export const Image = Node.create({
         style: `width: ${HTMLAttributes.width}%`,
       }),
     ];
+  },
+
+  addStorage() {
+    return {
+      markdown: {
+        // Serialize as raw HTML to preserve width attribute
+        // Standard Markdown ![alt](src) would lose width info
+        serialize(state: MarkdownSerializerState, node: ProseMirrorNode) {
+          const src = node.attrs.src as string || "";
+          const alt = node.attrs.alt as string || "";
+          const title = node.attrs.title as string || "";
+          const width = node.attrs.width as number;
+
+          // Escape quotes in attributes
+          const escapedSrc = src.replace(/"/g, "&quot;");
+          const escapedAlt = alt.replace(/"/g, "&quot;");
+          const escapedTitle = title.replace(/"/g, "&quot;");
+
+          state.write(`<img src="${escapedSrc}" alt="${escapedAlt}" title="${escapedTitle}" width="${width}%">`);
+          state.closeBlock(node);
+        },
+        parse: {
+          // Parsing is handled by parseHTML() since markdown-it with html: true
+          // will pass through <img> tags which TipTap then parses
+        },
+      },
+    };
   },
 
   addNodeView() {
