@@ -22,6 +22,7 @@ import styles from "./ContextMenu.module.css";
 
 export interface ContextMenuProps {
   editor: Editor | null;
+  onOpenLinkInput?: () => void;
 }
 
 interface MenuPosition {
@@ -42,7 +43,7 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-export function ContextMenu({ editor }: ContextMenuProps) {
+export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<MenuPosition>({ x: 0, y: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
@@ -236,11 +237,7 @@ export function ContextMenu({ editor }: ContextMenuProps) {
         label: "Link",
         shortcut: "Ctrl+K",
         action: () => {
-          // Will be implemented in Task 7
-          const url = window.prompt("Enter URL:");
-          if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
-          }
+          onOpenLinkInput?.();
         },
       },
       {
