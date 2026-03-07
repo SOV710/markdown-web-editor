@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { EditorContent } from "@tiptap/react";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
+import type { MarkdownStorage } from "tiptap-markdown";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
 import { Toolbar } from "./Toolbar";
@@ -22,20 +23,20 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("richtext");
   const [markdownSource, setMarkdownSource] = useState("");
 
-  // Sync markdown source when switching to source view
+  // Sync markdown source when switching views
   const handleModeChange = useCallback(
     (newMode: ViewMode) => {
       if (!editor) return;
 
       if (newMode === "source") {
-        // TODO: Task 3 will replace this
-        // const html = editor.getHTML();
-        // const markdown = htmlToMarkdown(html);
-        // setMarkdownSource(markdown);
+        // Serialize TipTap doc → Markdown directly from ProseMirror doc
+        const storage = editor.storage as unknown as { markdown: MarkdownStorage };
+        const markdown = storage.markdown.getMarkdown();
+        setMarkdownSource(markdown);
       } else {
-        // TODO: Task 3 will replace this
-        // const html = markdownToHtml(markdownSource);
-        // editor.commands.setContent(html);
+        // Parse Markdown → TipTap doc directly via tiptap-markdown
+        // setContent accepts Markdown strings when the Markdown extension is active
+        editor.commands.setContent(markdownSource);
       }
 
       setViewMode(newMode);
