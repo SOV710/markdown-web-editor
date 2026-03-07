@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useCallback, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
 import {
@@ -46,11 +46,14 @@ interface MenuSection {
 
 export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState<MenuPosition>({ x: 0, y: 0 });
+  const [clickPosition, setClickPosition] = useState<MenuPosition>({ x: 0, y: 0 });
+  const [adjustedPosition, setAdjustedPosition] = useState<MenuPosition>({ x: 0, y: 0 });
+  const [measured, setMeasured] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+    setMeasured(false);
   }, []);
 
   // Handle right-click
@@ -67,25 +70,10 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
 
         event.preventDefault();
 
-        // Calculate position within viewport
-        const menuWidth = 200;
-        const menuHeight = 380;
-        const padding = 8;
-
-        let x = event.clientX;
-        let y = event.clientY;
-
-        // Adjust if menu would overflow right edge
-        if (x + menuWidth + padding > window.innerWidth) {
-          x = window.innerWidth - menuWidth - padding;
-        }
-
-        // Adjust if menu would overflow bottom edge
-        if (y + menuHeight + padding > window.innerHeight) {
-          y = window.innerHeight - menuHeight - padding;
-        }
-
-        setPosition({ x, y });
+        // Store the click position - adjustment happens in useLayoutEffect
+        setClickPosition({ x: event.clientX, y: event.clientY });
+        setAdjustedPosition({ x: event.clientX, y: event.clientY });
+        setMeasured(false);
         setIsOpen(true);
       } catch (error) {
         console.error("ContextMenu handleContextMenu error:", error);
@@ -95,6 +83,33 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
     document.addEventListener("contextmenu", handleContextMenu);
     return () => document.removeEventListener("contextmenu", handleContextMenu);
   }, [editor]);
+
+  // Measure and adjust position after render
+  useLayoutEffect(() => {
+    if (!isOpen || measured || !menuRef.current) return;
+
+    const rect = menuRef.current.getBoundingClientRect();
+    const padding = 8;
+    let x = clickPosition.x;
+    let y = clickPosition.y;
+
+    // Flip left if would overflow right edge
+    if (x + rect.width + padding > window.innerWidth) {
+      x = clickPosition.x - rect.width;
+    }
+
+    // Flip up if would overflow bottom edge
+    if (y + rect.height + padding > window.innerHeight) {
+      y = clickPosition.y - rect.height;
+    }
+
+    // Ensure menu stays within viewport bounds
+    x = Math.max(padding, Math.min(x, window.innerWidth - rect.width - padding));
+    y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
+
+    setAdjustedPosition({ x, y });
+    setMeasured(true);
+  }, [isOpen, measured, clickPosition]);
 
   // Close on click outside
   useEffect(() => {
@@ -415,8 +430,9 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
       ref={menuRef}
       className={styles.menu}
       style={{
-        left: position.x,
-        top: position.y,
+        left: adjustedPosition.x,
+        top: adjustedPosition.y,
+        visibility: measured ? "visible" : "hidden",
       }}
     >
       {sections.map((section, sectionIndex) => (
