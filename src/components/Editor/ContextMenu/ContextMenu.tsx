@@ -57,31 +57,38 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
     if (!editor) return;
 
     const handleContextMenu = (event: MouseEvent) => {
-      const editorElement = editor.view.dom;
-      if (!editorElement.contains(event.target as Node)) return;
+      try {
+        // Safety check: ensure editor view and DOM are available
+        if (!editor.view || !editor.view.dom) return;
 
-      event.preventDefault();
+        const editorElement = editor.view.dom;
+        if (!editorElement.contains(event.target as Node)) return;
 
-      // Calculate position within viewport
-      const menuWidth = 200;
-      const menuHeight = 380;
-      const padding = 8;
+        event.preventDefault();
 
-      let x = event.clientX;
-      let y = event.clientY;
+        // Calculate position within viewport
+        const menuWidth = 200;
+        const menuHeight = 380;
+        const padding = 8;
 
-      // Adjust if menu would overflow right edge
-      if (x + menuWidth + padding > window.innerWidth) {
-        x = window.innerWidth - menuWidth - padding;
+        let x = event.clientX;
+        let y = event.clientY;
+
+        // Adjust if menu would overflow right edge
+        if (x + menuWidth + padding > window.innerWidth) {
+          x = window.innerWidth - menuWidth - padding;
+        }
+
+        // Adjust if menu would overflow bottom edge
+        if (y + menuHeight + padding > window.innerHeight) {
+          y = window.innerHeight - menuHeight - padding;
+        }
+
+        setPosition({ x, y });
+        setIsOpen(true);
+      } catch (error) {
+        console.error("ContextMenu handleContextMenu error:", error);
       }
-
-      // Adjust if menu would overflow bottom edge
-      if (y + menuHeight + padding > window.innerHeight) {
-        y = window.innerHeight - menuHeight - padding;
-      }
-
-      setPosition({ x, y });
-      setIsOpen(true);
     };
 
     document.addEventListener("contextmenu", handleContextMenu);
@@ -113,52 +120,68 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
     };
   }, [isOpen, closeMenu]);
 
+  // Early return if not ready
   if (!editor || !isOpen) return null;
+
+  // Safe wrapper for isActive that won't throw
+  const safeIsActive = (name: string): boolean => {
+    try {
+      return editor.isActive(name);
+    } catch (error) {
+      console.error("safeIsActive error:", name, error);
+      return false;
+    }
+  };
 
   /**
    * Expand selection to word if no selection exists.
    * Uses Intl.Segmenter for proper Chinese/CJK word boundary detection.
    */
   const expandSelectionToWord = (): boolean => {
-    const { state } = editor;
-    const { selection } = state;
+    try {
+      const { state } = editor;
+      const { selection } = state;
 
-    // If there's already a selection, don't expand
-    if (!selection.empty) {
+      // If there's already a selection, don't expand
+      if (!selection.empty) {
+        return true;
+      }
+
+      // Get the text node at cursor position
+      const { $from } = selection;
+      const textNode = $from.parent;
+
+      if (!textNode.isTextblock) {
+        return false;
+      }
+
+      // Get the text content and cursor position within the node
+      const text = textNode.textContent;
+      const cursorInNode = $from.parentOffset;
+
+      // Find word at cursor position
+      const wordBoundary = findWordAtPosition(text, cursorInNode);
+
+      if (!wordBoundary) {
+        return false;
+      }
+
+      // Calculate absolute positions
+      const nodeStart = $from.start();
+      const wordStart = nodeStart + wordBoundary.start;
+      const wordEnd = nodeStart + wordBoundary.end;
+
+      // Set selection to the word
+      editor
+        .chain()
+        .setTextSelection({ from: wordStart, to: wordEnd })
+        .run();
+
       return true;
-    }
-
-    // Get the text node at cursor position
-    const { $from } = selection;
-    const textNode = $from.parent;
-
-    if (!textNode.isTextblock) {
+    } catch (error) {
+      console.error("expandSelectionToWord error:", error);
       return false;
     }
-
-    // Get the text content and cursor position within the node
-    const text = textNode.textContent;
-    const cursorInNode = $from.parentOffset;
-
-    // Find word at cursor position
-    const wordBoundary = findWordAtPosition(text, cursorInNode);
-
-    if (!wordBoundary) {
-      return false;
-    }
-
-    // Calculate absolute positions
-    const nodeStart = $from.start();
-    const wordStart = nodeStart + wordBoundary.start;
-    const wordEnd = nodeStart + wordBoundary.end;
-
-    // Set selection to the word
-    editor
-      .chain()
-      .setTextSelection({ from: wordStart, to: wordEnd })
-      .run();
-
-    return true;
   };
 
   /**
@@ -168,14 +191,22 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
     formatFn: (ed: Editor) => ReturnType<Editor["chain"]>
   ) => {
     return () => {
-      if (!editor) return;
-      expandSelectionToWord();
-      formatFn(editor).run();
+      try {
+        if (!editor) return;
+        expandSelectionToWord();
+        formatFn(editor).run();
+      } catch (error) {
+        console.error("Format action error:", error);
+      }
     };
   };
 
   const handleAction = (action: () => void) => {
-    action();
+    try {
+      action();
+    } catch (error) {
+      console.error("Menu action error:", error);
+    }
     closeMenu();
   };
 
@@ -187,14 +218,14 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         label: "Bold",
         shortcut: "Ctrl+B",
         action: createFormatAction((ed) => ed.chain().focus().toggleBold()),
-        isActive: editor.isActive("bold"),
+        isActive: safeIsActive("bold"),
       },
       {
         icon: <TextItalic size={16} weight="bold" />,
         label: "Italic",
         shortcut: "Ctrl+I",
         action: createFormatAction((ed) => ed.chain().focus().toggleItalic()),
-        isActive: editor.isActive("italic"),
+        isActive: safeIsActive("italic"),
       },
       {
         icon: <TextUnderline size={16} weight="bold" />,
@@ -203,13 +234,13 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         action: createFormatAction((ed) =>
           ed.chain().focus().toggleUnderline()
         ),
-        isActive: editor.isActive("underline"),
+        isActive: safeIsActive("underline"),
       },
       {
         icon: <TextStrikethrough size={16} weight="bold" />,
         label: "Strikethrough",
         action: createFormatAction((ed) => ed.chain().focus().toggleStrike()),
-        isActive: editor.isActive("strike"),
+        isActive: safeIsActive("strike"),
       },
       {
         icon: <Highlighter size={16} weight="bold" />,
@@ -218,13 +249,13 @@ export function ContextMenu({ editor, onOpenLinkInput }: ContextMenuProps) {
         action: createFormatAction((ed) =>
           ed.chain().focus().toggleHighlight()
         ),
-        isActive: editor.isActive("highlight"),
+        isActive: safeIsActive("highlight"),
       },
       {
         icon: <Code size={16} weight="bold" />,
         label: "Inline Code",
         action: createFormatAction((ed) => ed.chain().focus().toggleCode()),
-        isActive: editor.isActive("code"),
+        isActive: safeIsActive("code"),
       },
     ],
   };
