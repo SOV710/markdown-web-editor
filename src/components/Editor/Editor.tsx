@@ -6,6 +6,7 @@ import type { MarkdownStorage } from "tiptap-markdown";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
 import { TableMenu } from "./TableMenu";
+import { ContextMenu } from "./ContextMenu";
 import { SourceEditor } from "./SourceEditor";
 import { ViewToggle, type ViewMode } from "./ViewToggle";
 import styles from "./Editor.module.css";
@@ -66,6 +67,7 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
         <div className={styles.editorArea}>
           <EditorContent editor={editor} />
           {editor && <TableMenu editor={editor} />}
+          {editor && <ContextMenu editor={editor} />}
           {editor && (
             <DragHandle editor={editor} className={styles.dragHandle}>
               <DotsSixVertical size={16} weight="bold" />
