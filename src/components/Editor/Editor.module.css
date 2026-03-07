@@ -9,13 +9,20 @@
   flex-direction: column;
 }
 
+.toolbarRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+
 .toolbar {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-subtle);
+  flex: 1;
   flex-wrap: wrap;
 }
 
@@ -42,6 +49,16 @@
 .toolbarBtn[data-active="true"] {
   background: var(--color-accent);
   color: #fff;
+}
+
+.toolbarBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbarBtn:disabled:hover {
+  background: transparent;
+  color: var(--color-text-secondary);
 }
 
 .divider {

@@ -3,6 +3,7 @@ import styles from "./Editor.module.css";
 
 interface ToolbarProps {
   editor: Editor | null;
+  disabled?: boolean;
 }
 
 interface ToolbarBtnProps {
@@ -10,9 +11,10 @@ interface ToolbarBtnProps {
   active?: boolean;
   title: string;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
-function ToolbarBtn({ onClick, active, title, children }: ToolbarBtnProps) {
+function ToolbarBtn({ onClick, active, title, children, disabled }: ToolbarBtnProps) {
   return (
     <button
       className={styles.toolbarBtn}
@@ -20,6 +22,7 @@ function ToolbarBtn({ onClick, active, title, children }: ToolbarBtnProps) {
       data-active={active}
       title={title}
       type="button"
+      disabled={disabled}
     >
       {children}
     </button>
@@ -58,7 +61,7 @@ function handleVideoClick(editor: Editor) {
   }
 }
 
-export function Toolbar({ editor }: ToolbarProps) {
+export function Toolbar({ editor, disabled }: ToolbarProps) {
   if (!editor) return null;
 
   return (
@@ -68,6 +71,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         active={editor.isActive("heading", { level: 1 })}
         title="Heading 1 (Ctrl+Alt+1)"
+        disabled={disabled}
       >
         H1
       </ToolbarBtn>
@@ -75,6 +79,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={editor.isActive("heading", { level: 2 })}
         title="Heading 2 (Ctrl+Alt+2)"
+        disabled={disabled}
       >
         H2
       </ToolbarBtn>
@@ -82,6 +87,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         active={editor.isActive("heading", { level: 3 })}
         title="Heading 3 (Ctrl+Alt+3)"
+        disabled={disabled}
       >
         H3
       </ToolbarBtn>
@@ -93,6 +99,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleBold().run()}
         active={editor.isActive("bold")}
         title="Bold (Ctrl+B)"
+        disabled={disabled}
       >
         B
       </ToolbarBtn>
@@ -100,6 +107,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={editor.isActive("italic")}
         title="Italic (Ctrl+I)"
+        disabled={disabled}
       >
         I
       </ToolbarBtn>
@@ -107,6 +115,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={editor.isActive("underline")}
         title="Underline (Ctrl+U)"
+        disabled={disabled}
       >
         <span style={{ textDecoration: "underline" }}>U</span>
       </ToolbarBtn>
@@ -114,6 +123,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive("strike")}
         title="Strikethrough (Ctrl+Shift+S)"
+        disabled={disabled}
       >
         S
       </ToolbarBtn>
@@ -121,6 +131,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleCode().run()}
         active={editor.isActive("code")}
         title="Inline code (Ctrl+E)"
+        disabled={disabled}
       >
         {"<>"}
       </ToolbarBtn>
@@ -128,6 +139,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => handleLinkClick(editor)}
         active={editor.isActive("link")}
         title="Link"
+        disabled={disabled}
       >
         {"🔗"}
       </ToolbarBtn>
@@ -139,6 +151,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         active={editor.isActive("bulletList")}
         title="Bullet list"
+        disabled={disabled}
       >
         •
       </ToolbarBtn>
@@ -146,6 +159,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         active={editor.isActive("orderedList")}
         title="Ordered list"
+        disabled={disabled}
       >
         1.
       </ToolbarBtn>
@@ -153,6 +167,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleTaskList().run()}
         active={editor.isActive("taskList")}
         title="Task list"
+        disabled={disabled}
       >
         {"[ ]"}
       </ToolbarBtn>
@@ -160,6 +175,7 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         active={editor.isActive("blockquote")}
         title="Blockquote"
+        disabled={disabled}
       >
         "
       </ToolbarBtn>
@@ -167,18 +183,21 @@ export function Toolbar({ editor }: ToolbarProps) {
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         active={editor.isActive("codeBlock")}
         title="Code block"
+        disabled={disabled}
       >
         {"{ }"}
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
         title="Horizontal rule"
+        disabled={disabled}
       >
         ―
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => handleImageClick(editor)}
         title="Image"
+        disabled={disabled}
       >
         {"🖼️"}
       </ToolbarBtn>
@@ -187,12 +206,14 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
         }
         title="Insert table"
+        disabled={disabled}
       >
         {"⊞"}
       </ToolbarBtn>
       <ToolbarBtn
         onClick={() => handleVideoClick(editor)}
         title="Insert video"
+        disabled={disabled}
       >
         {"▶"}
       </ToolbarBtn>

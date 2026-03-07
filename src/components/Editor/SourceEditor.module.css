@@ -1,0 +1,23 @@
+.container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
