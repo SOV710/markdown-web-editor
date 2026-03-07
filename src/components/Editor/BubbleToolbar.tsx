@@ -1,5 +1,14 @@
 import { BubbleMenu } from "@tiptap/react/menus";
 import type { Editor } from "@tiptap/core";
+import {
+  TextB,
+  TextItalic,
+  TextUnderline,
+  TextStrikethrough,
+  Code,
+  Link,
+} from "@phosphor-icons/react";
+import { ICON_SIZE_SM } from "./icons";
 import styles from "./BubbleToolbar.module.css";
 
 interface BubbleToolbarProps {
@@ -70,42 +79,42 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
         active={editor.isActive("bold")}
         title="Bold"
       >
-        B
+        <TextB size={ICON_SIZE_SM} />
       </BubbleButton>
       <BubbleButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={editor.isActive("italic")}
         title="Italic"
       >
-        I
+        <TextItalic size={ICON_SIZE_SM} />
       </BubbleButton>
       <BubbleButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={editor.isActive("underline")}
         title="Underline"
       >
-        <span style={{ textDecoration: "underline" }}>U</span>
+        <TextUnderline size={ICON_SIZE_SM} />
       </BubbleButton>
       <BubbleButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive("strike")}
         title="Strikethrough"
       >
-        S
+        <TextStrikethrough size={ICON_SIZE_SM} />
       </BubbleButton>
       <BubbleButton
         onClick={() => editor.chain().focus().toggleCode().run()}
         active={editor.isActive("code")}
         title="Code"
       >
-        {"<>"}
+        <Code size={ICON_SIZE_SM} />
       </BubbleButton>
       <BubbleButton
         onClick={() => handleLinkClick(editor)}
         active={editor.isActive("link")}
         title="Link"
       >
-        {"🔗"}
+        <Link size={ICON_SIZE_SM} />
       </BubbleButton>
     </BubbleMenu>
   );
