@@ -26,6 +26,15 @@
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
 
+  /* -- Toolbar (dark surface) -- */
+  --color-toolbar-bg: #1c1c1e;
+  --color-toolbar-border: rgba(255, 255, 255, 0.08);
+  --color-toolbar-text: rgba(255, 255, 255, 0.65);
+  --color-toolbar-text-hover: rgba(255, 255, 255, 0.95);
+  --color-toolbar-text-active: #ffffff;
+  --color-toolbar-btn-hover-bg: rgba(255, 255, 255, 0.1);
+  --color-toolbar-btn-active-bg: var(--color-accent);
+
   /* -- Typography -- */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
