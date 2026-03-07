@@ -17,6 +17,7 @@ import {
   Copy,
   ClipboardText,
 } from "@phosphor-icons/react";
+import { findWordAtPosition } from "@/lib/word-segmentation";
 import styles from "./ContextMenu.module.css";
 
 export interface ContextMenuProps {
@@ -113,6 +114,65 @@ export function ContextMenu({ editor }: ContextMenuProps) {
 
   if (!editor || !isOpen) return null;
 
+  /**
+   * Expand selection to word if no selection exists.
+   * Uses Intl.Segmenter for proper Chinese/CJK word boundary detection.
+   */
+  const expandSelectionToWord = (): boolean => {
+    const { state } = editor;
+    const { selection } = state;
+
+    // If there's already a selection, don't expand
+    if (!selection.empty) {
+      return true;
+    }
+
+    // Get the text node at cursor position
+    const { $from } = selection;
+    const textNode = $from.parent;
+
+    if (!textNode.isTextblock) {
+      return false;
+    }
+
+    // Get the text content and cursor position within the node
+    const text = textNode.textContent;
+    const cursorInNode = $from.parentOffset;
+
+    // Find word at cursor position
+    const wordBoundary = findWordAtPosition(text, cursorInNode);
+
+    if (!wordBoundary) {
+      return false;
+    }
+
+    // Calculate absolute positions
+    const nodeStart = $from.start();
+    const wordStart = nodeStart + wordBoundary.start;
+    const wordEnd = nodeStart + wordBoundary.end;
+
+    // Set selection to the word
+    editor
+      .chain()
+      .setTextSelection({ from: wordStart, to: wordEnd })
+      .run();
+
+    return true;
+  };
+
+  /**
+   * Create a formatting action that expands selection to word first if needed.
+   */
+  const createFormatAction = (
+    formatFn: (ed: Editor) => ReturnType<Editor["chain"]>
+  ) => {
+    return () => {
+      if (!editor) return;
+      expandSelectionToWord();
+      formatFn(editor).run();
+    };
+  };
+
   const handleAction = (action: () => void) => {
     action();
     closeMenu();
@@ -125,40 +185,44 @@ export function ContextMenu({ editor }: ContextMenuProps) {
         icon: <TextB size={16} weight="bold" />,
         label: "Bold",
         shortcut: "Ctrl+B",
-        action: () => editor.chain().focus().toggleBold().run(),
+        action: createFormatAction((ed) => ed.chain().focus().toggleBold()),
         isActive: editor.isActive("bold"),
       },
       {
         icon: <TextItalic size={16} weight="bold" />,
         label: "Italic",
         shortcut: "Ctrl+I",
-        action: () => editor.chain().focus().toggleItalic().run(),
+        action: createFormatAction((ed) => ed.chain().focus().toggleItalic()),
         isActive: editor.isActive("italic"),
       },
       {
         icon: <TextUnderline size={16} weight="bold" />,
         label: "Underline",
         shortcut: "Ctrl+U",
-        action: () => editor.chain().focus().toggleUnderline().run(),
+        action: createFormatAction((ed) =>
+          ed.chain().focus().toggleUnderline()
+        ),
         isActive: editor.isActive("underline"),
       },
       {
         icon: <TextStrikethrough size={16} weight="bold" />,
         label: "Strikethrough",
-        action: () => editor.chain().focus().toggleStrike().run(),
+        action: createFormatAction((ed) => ed.chain().focus().toggleStrike()),
         isActive: editor.isActive("strike"),
       },
       {
         icon: <Highlighter size={16} weight="bold" />,
         label: "Highlight",
         shortcut: "Ctrl+Shift+H",
-        action: () => editor.chain().focus().toggleHighlight().run(),
+        action: createFormatAction((ed) =>
+          ed.chain().focus().toggleHighlight()
+        ),
         isActive: editor.isActive("highlight"),
       },
       {
         icon: <Code size={16} weight="bold" />,
         label: "Inline Code",
-        action: () => editor.chain().focus().toggleCode().run(),
+        action: createFormatAction((ed) => ed.chain().focus().toggleCode()),
         isActive: editor.isActive("code"),
       },
     ],
