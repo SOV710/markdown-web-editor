@@ -5,9 +5,7 @@ import { DotsSixVertical } from "@phosphor-icons/react";
 import type { MarkdownStorage } from "tiptap-markdown";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
-import { Toolbar } from "./Toolbar";
 import { TableMenu } from "./TableMenu";
-import { BubbleToolbar } from "./BubbleToolbar";
 import { SourceEditor } from "./SourceEditor";
 import { ViewToggle, type ViewMode } from "./ViewToggle";
 import styles from "./Editor.module.css";
@@ -61,7 +59,6 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
   return (
     <div className={`${styles.wrapper} ${className ?? ""}`}>
       <div className={styles.toolbarRow}>
-        <Toolbar editor={editor} disabled={viewMode === "source"} />
         <ViewToggle mode={viewMode} onModeChange={handleModeChange} />
       </div>
 
@@ -69,7 +66,6 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
         <div className={styles.editorArea}>
           <EditorContent editor={editor} />
           {editor && <TableMenu editor={editor} />}
-          {editor && <BubbleToolbar editor={editor} />}
           {editor && (
             <DragHandle editor={editor} className={styles.dragHandle}>
               <DotsSixVertical size={16} weight="bold" />
