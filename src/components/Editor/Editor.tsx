@@ -1,9 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { EditorContent } from "@tiptap/react";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
-import { htmlToMarkdown, markdownToHtml } from "@/lib/markdown-converter";
 import { Toolbar } from "./Toolbar";
 import { TableMenu } from "./TableMenu";
 import { BubbleToolbar } from "./BubbleToolbar";
@@ -22,32 +21,24 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
   const editor = useMarkdownEditor(editorOptions);
   const [viewMode, setViewMode] = useState<ViewMode>("richtext");
   const [markdownSource, setMarkdownSource] = useState("");
-  const isTransitioning = useRef(false);
 
   // Sync markdown source when switching to source view
   const handleModeChange = useCallback(
     (newMode: ViewMode) => {
       if (!editor) return;
 
-      isTransitioning.current = true;
-
       if (newMode === "source") {
-        // Convert HTML to Markdown
-        const html = editor.getHTML();
-        const markdown = htmlToMarkdown(html);
-        setMarkdownSource(markdown);
+        // TODO: Task 3 will replace this
+        // const html = editor.getHTML();
+        // const markdown = htmlToMarkdown(html);
+        // setMarkdownSource(markdown);
       } else {
-        // Convert Markdown to HTML and update editor
-        const html = markdownToHtml(markdownSource);
-        editor.commands.setContent(html);
+        // TODO: Task 3 will replace this
+        // const html = markdownToHtml(markdownSource);
+        // editor.commands.setContent(html);
       }
 
       setViewMode(newMode);
-
-      // Reset transition flag after a tick
-      requestAnimationFrame(() => {
-        isTransitioning.current = false;
-      });
     },
     [editor, markdownSource]
   );
