@@ -45,11 +45,11 @@ editor.chain().focus().toggleUnderline().run()
 **功能**: 超链接
 
 **配置**:
-| 选项 | 值 | 说明 |
-|------|------|------|
-| openOnClick | false | 编辑模式下点击不跳转 |
-| autolink | true | 自动识别 URL |
-| linkOnPaste | true | 粘贴 URL 自动转为链接 |
+| 选项        | 值    | 说明                  |
+|-------------|-------|-----------------------|
+| openOnClick | false | 编辑模式下点击不跳转  |
+| autolink    | true  | 自动识别 URL          |
+| linkOnPaste | true  | 粘贴 URL 自动转为链接 |
 
 **用法**:
 ```ts

@@ -4,18 +4,18 @@
 
 ```
 ┌─────────────────────────────────────────┐
-│              App.tsx                     │  入口
+│              App.tsx                    │  入口
 ├─────────────────────────────────────────┤
-│           Components Layer               │  UI 组件
+│           Components Layer              │  UI 组件
 │  (Editor, Toolbar, BubbleToolbar, ...)  │
 ├─────────────────────────────────────────┤
-│             Library Layer                │  工具层
-│  (useMarkdownEditor, markdown-converter) │
+│             Library Layer               │  工具层
+│  (useMarkdownEditor, markdown-converter)│
 ├─────────────────────────────────────────┤
-│           Extensions Layer               │  扩展层
+│           Extensions Layer              │  扩展层
 │  (Image, Table, MathBlock, ...)         │
 ├─────────────────────────────────────────┤
-│         TipTap / ProseMirror             │  编辑器核心
+│         TipTap / ProseMirror            │  编辑器核心
 └─────────────────────────────────────────┘
 ```
 
@@ -53,23 +53,23 @@ editor.setContent()
 
 ## 目录职责
 
-| 目录 | 职责 |
-|------|------|
-| `src/extensions/` | TipTap 节点 (Node) 和扩展 (Extension) 定义 |
-| `src/components/Editor/` | React UI 组件 |
-| `src/lib/` | 编辑器初始化 Hook、格式转换工具 |
-| `src/styles/` | CSS 变量、编辑器内容样式 |
-| `src/types/` | TypeScript 类型定义 |
+| 目录                     | 职责                                       |
+|--------------------------|--------------------------------------------|
+| `src/extensions/`        | TipTap 节点 (Node) 和扩展 (Extension) 定义 |
+| `src/components/Editor/` | React UI 组件                              |
+| `src/lib/`               | 编辑器初始化 Hook、格式转换工具            |
+| `src/styles/`            | CSS 变量、编辑器内容样式                   |
+| `src/types/`             | TypeScript 类型定义                        |
 
 ## 扩展类型
 
 TipTap 扩展分三类:
 
-| 类型 | 说明 | 示例 |
-|------|------|------|
-| Node | 块级或行内节点 | Image, Table, MathBlock |
-| Mark | 文本修饰 | Underline, Link |
-| Extension | 功能增强 | SlashCommand, CustomKeymap |
+| 类型      | 说明           | 示例                       |
+|-----------|----------------|----------------------------|
+| Node      | 块级或行内节点 | Image, Table, MathBlock    |
+| Mark      | 文本修饰       | Underline, Link            |
+| Extension | 功能增强       | SlashCommand, CustomKeymap |
 
 ## 关键设计
 
