@@ -6,10 +6,11 @@ export function insertMarkdownLink(editor: Editor): void {
 
   if (empty) {
     // No selection: insert []() and place cursor inside []
+    // Use explicit text node to avoid Markdown parsing by tiptap-markdown
     editor
       .chain()
       .focus()
-      .insertContent("[]()")
+      .insertContent({ type: "text", text: "[]()" })
       .setTextSelection(from + 1) // cursor inside []
       .run();
   } else {
@@ -19,7 +20,7 @@ export function insertMarkdownLink(editor: Editor): void {
       .chain()
       .focus()
       .deleteSelection()
-      .insertContent(`[${selectedText}]()`)
+      .insertContent({ type: "text", text: `[${selectedText}]()` })
       .setTextSelection(from + selectedText.length + 3) // cursor inside ()
       .run();
   }
@@ -31,10 +32,11 @@ export function insertMarkdownImage(editor: Editor): void {
 
   if (empty) {
     // No selection: insert ![]() and place cursor inside []
+    // Use explicit text node to avoid Markdown parsing by tiptap-markdown
     editor
       .chain()
       .focus()
-      .insertContent("![]()")
+      .insertContent({ type: "text", text: "![]()" })
       .setTextSelection(from + 2) // cursor inside [] for alt text
       .run();
   } else {
@@ -44,7 +46,7 @@ export function insertMarkdownImage(editor: Editor): void {
       .chain()
       .focus()
       .deleteSelection()
-      .insertContent(`![${selectedText}]()`)
+      .insertContent({ type: "text", text: `![${selectedText}]()` })
       .setTextSelection(from + selectedText.length + 4) // cursor inside ()
       .run();
   }
