@@ -31,10 +31,9 @@ interface MenuPanelProps {
   position: Position;       // Only used for root menu
   onClose: () => void;
   isSubmenu?: boolean;
-  triggerRef?: React.RefObject<HTMLElement | null>;  // The specific item that opens this submenu
 }
 
-function MenuPanel({ items, position, onClose, isSubmenu = false, triggerRef }: MenuPanelProps) {
+function MenuPanel({ items, position, onClose, isSubmenu = false }: MenuPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [adjustedPosition, setAdjustedPosition] = useState<Position>(position);
   const [measured, setMeasured] = useState(false);
@@ -52,32 +51,38 @@ function MenuPanel({ items, position, onClose, isSubmenu = false, triggerRef }: 
     let x: number;
     let y: number;
 
-    if (isSubmenu && triggerRef?.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      // Find the parent panel (trigger's closest .panel ancestor)
-      const parentPanel = triggerRef.current.closest(`.${styles.panel}`);
-      const parentRect = parentPanel?.getBoundingClientRect();
+    if (isSubmenu) {
+      // The submenu panel is inside a .submenuWrapper div.
+      // The trigger button is the sibling button within the wrapper.
+      // The parent panel is the grandparent .panel element.
+      const wrapper = panelRef.current.parentElement; // .submenuWrapper
+      const triggerButton = wrapper?.querySelector("button");
+      const parentPanel = wrapper?.closest(`.${styles.panel}`);
 
-      // X: flush to the right of the parent panel, overlapping by 2px for visual continuity
-      x = (parentRect?.right ?? triggerRect.right) - 2;
+      if (triggerButton && parentPanel) {
+        const triggerRect = triggerButton.getBoundingClientRect();
+        const parentRect = parentPanel.getBoundingClientRect();
 
-      // Flip left if overflows right edge
-      if (x + rect.width + padding > window.innerWidth) {
-        x = (parentRect?.left ?? triggerRect.left) - rect.width + 2;
+        // X: flush to right edge of parent panel
+        x = parentRect.right - 2;
+        if (x + rect.width + padding > window.innerWidth) {
+          x = parentRect.left - rect.width + 2;
+        }
+
+        // Y: top-aligned with trigger button
+        y = triggerRect.top;
+        if (y + rect.height + padding > window.innerHeight) {
+          y = triggerRect.bottom - rect.height;
+        }
+
+        y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
+      } else {
+        // Fallback: position near click
+        x = position.x;
+        y = position.y;
       }
 
-      // Y: align top of submenu with the trigger item
-      y = triggerRect.top;
-
-      // INDEPENDENT vertical flip: if submenu overflows bottom, flip upward
-      // Align the BOTTOM of the submenu with the BOTTOM of the trigger item
-      if (y + rect.height + padding > window.innerHeight) {
-        y = triggerRect.bottom - rect.height;
-      }
-
-      // Final clamp to viewport
-      y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
-
+      x = Math.max(padding, Math.min(x, window.innerWidth - rect.width - padding));
     } else {
       // Root menu positioning
       x = position.x;
@@ -96,7 +101,7 @@ function MenuPanel({ items, position, onClose, isSubmenu = false, triggerRef }: 
 
     setAdjustedPosition({ x, y });
     setMeasured(true);
-  }, [position, isSubmenu, triggerRef]);
+  }, [position, isSubmenu]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -206,10 +211,9 @@ function MenuPanel({ items, position, onClose, isSubmenu = false, triggerRef }: 
               {isOpen && (
                 <MenuPanel
                   items={item.children}
-                  position={{ x: 0, y: 0 }}  // Ignored for submenus
+                  position={{ x: 0, y: 0 }}
                   onClose={onClose}
                   isSubmenu
-                  triggerRef={{ current: itemRefs.current[index] ?? null }}
                 />
               )}
             </div>
