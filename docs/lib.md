@@ -227,6 +227,27 @@ import { insertMarkdownImage } from "@/lib/link-utils";
 insertMarkdownImage(editor);
 ```
 
+### insertMarkdownVideo
+
+**Signature**:
+```ts
+function insertMarkdownVideo(editor: Editor): void
+```
+
+**Behavior**:
+| Selection State | Action |
+|-----------------|--------|
+| No selection | Insert `@[]()`, cursor inside `[]` for title |
+| Has selection | Use selection as title: `@[selectedText]()`, cursor inside `()` |
+
+**Usage**:
+```ts
+import { insertMarkdownVideo } from "@/lib/link-utils";
+
+// Via context menu or slash command
+insertMarkdownVideo(editor);
+```
+
 ---
 
 ## wordSegmentation

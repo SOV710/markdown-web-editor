@@ -84,6 +84,18 @@ editor.chain().focus().unsetLink().run()
 </div>
 ```
 
+**Load Failure Fallback**: When image fails to load, displays `!` prefix with link:
+```html
+<div class="image-fallback">
+  <span class="image-fallback-prefix">!</span>
+  <a class="image-fallback-link" href="...">alt text or URL</a>
+</div>
+```
+
+**InputRule**: Typing `![alt](url)` auto-converts to Image node when `)` is typed
+
+**PasteRule**: Pasting text containing `![alt](url)` auto-converts to Image nodes
+
 **Drag-and-Drop**: Dropping image files inserts `![filename]()` placeholder at drop position
 
 **Markdown Serialization**: Raw HTML
@@ -104,6 +116,8 @@ editor.chain().focus().setImage({ src: '...' }).run()
 
 **Type**: Node
 
+**Markdown Syntax**: `@[title](url)`
+
 **Attributes**:
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -120,9 +134,21 @@ editor.chain().focus().setImage({ src: '...' }).run()
 </div>
 ```
 
-**Markdown Serialization**: Raw HTML
+**Load Failure Fallback**: When video fails to load, displays `@` prefix with link:
 ```html
-<video src="..." width="50%" title="..."></video>
+<div class="video-fallback">
+  <span class="video-fallback-prefix">@</span>
+  <a class="video-fallback-link" href="...">title or URL</a>
+</div>
+```
+
+**InputRule**: Typing `@[title](url)` auto-converts to VideoBlock node when `)` is typed
+
+**PasteRule**: Pasting text containing `@[title](url)` auto-converts to VideoBlock nodes
+
+**Markdown Serialization**:
+```
+@[My Video](https://example.com/video.mp4)
 ```
 
 **Usage**:

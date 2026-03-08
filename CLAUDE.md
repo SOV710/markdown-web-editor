@@ -68,7 +68,7 @@ addStorage() {
 }
 ```
 
-Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw HTML with `html: true` enabled in the Markdown extension config.
+Extensions without standard Markdown syntax serialize as raw HTML with `html: true` enabled in the Markdown extension config. Image uses raw HTML to preserve width; VideoBlock uses custom `@[title](url)` syntax with markdown-it block rule.
 
 ### Custom Node Types
 
@@ -77,8 +77,8 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 | MathInline | `$...$` | KaTeX inline math, click to edit, paste rule support |
 | MathBlock | `$$...$$` | KaTeX block math with textarea + live preview |
 | PlantUMLBlock | ` ```plantuml ` | Encodes to plantuml.com SVG, 500ms debounce |
-| Image | raw HTML | Resizable image with custom NodeView (10-100% width), drag-and-drop support |
-| VideoBlock | raw HTML | Resizable video player with custom NodeView |
+| Image | `![alt](url)` + raw HTML | Resizable image with InputRule, PasteRule, drag-and-drop, load fallback |
+| VideoBlock | `@[title](url)` | Resizable video with InputRule, PasteRule, load fallback |
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 | Highlight | `==...==` | Marker pen style highlighting |
 | TyporaMode | - | Shows heading markers when cursor inside heading |
@@ -117,4 +117,5 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 - **Portal rendering**: ContextMenu uses `createPortal` to render outside ProseMirror DOM tree, preventing React/ProseMirror DOM conflicts that cause `insertBefore` errors
 - **TyporaMode safety**: The decorations callback is wrapped in try-catch, returning `DecorationSet.empty` on error (cosmetic failure only)
 - **Placeholder**: Uses TipTap Placeholder extension with per-node-type function for heading placeholders ("Heading 1", "Heading 2", etc.)
-- **Link/Image insertion**: Inserts plain Markdown syntax `[]()` / `![]()` rather than using dialogs
+- **Link/Image/Video insertion**: Inserts plain Markdown syntax `[]()` / `![]()` / `@[]()` rather than using dialogs; InputRules auto-convert to rich nodes when user types closing `)`
+- **Media load fallback**: Image and VideoBlock NodeViews show `!`/`@` prefix with link when media fails to load

@@ -126,6 +126,17 @@ Global styles are in `src/styles/`, component styles use CSS Modules.
 | `.resize-handle-right` | Right handle |
 | `.resize-handle::after` | Handle indicator bar, blue 4px wide |
 
+### Media Fallbacks
+
+| Class | Description |
+|-------|-------------|
+| `.image-fallback` | Image fallback container when load fails |
+| `.image-fallback-prefix` | `!` prefix for failed images |
+| `.image-fallback-link` | Link to original image URL |
+| `.video-fallback` | Video fallback container when load fails |
+| `.video-fallback-prefix` | `@` prefix for failed videos |
+| `.video-fallback-link` | Link to original video URL |
+
 ### Placeholder
 
 ```css
