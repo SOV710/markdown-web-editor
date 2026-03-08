@@ -66,7 +66,7 @@ Editor
 
 **File**: `ContextMenu/ContextMenu.tsx`
 
-**Purpose**: Right-click context menu for formatting, insertion, and clipboard operations
+**Purpose**: Right-click context menu with nested submenus for formatting, insertion, and clipboard operations
 
 **Props**:
 ```ts
@@ -77,33 +77,51 @@ interface ContextMenuProps {
 
 **Rendering**: Uses `createPortal` to render to `document.body`, avoiding React/ProseMirror DOM conflicts
 
-**Sections**:
+**Menu Structure** (nested submenus):
 
-| Section | Items |
-|---------|-------|
-| Format | Bold, Italic, Underline, Strikethrough, Highlight, Inline Code |
-| Insert | Link, Image, Table, Code Block, Math Block, Divider |
-| Clipboard | Cut, Copy, Paste |
+| Item | Type | Description |
+|------|------|-------------|
+| Add Link | action | Insert `[]()` link syntax (Ctrl+K) |
+| Search for "..." | action | Google search for selected text (only with selection) |
+| Format ▸ | submenu | Bold, Italic, Strikethrough, Highlight, Code, Math, Clear formatting |
+| Paragraph ▸ | submenu | Lists, Heading 1-6, Body, Quote |
+| Insert ▸ | submenu | Image, Video, Table, HR, Code block, Math block, PlantUML |
+| Cut | action | Cut to clipboard (disabled without selection) |
+| Copy | action | Copy to clipboard (disabled without selection) |
+| Paste | action | Paste from clipboard |
+| Paste as plain text | action | Paste without formatting |
+| Select all | action | Select all content |
+
+**Format Submenu**:
+- Bold (Ctrl+B), Italic (Ctrl+I), Strikethrough (Ctrl+Shift+S), Highlight (Ctrl+Shift+H)
+- Code (Ctrl+E), Math
+- Clear formatting
+- Shows checkmark (✓) for active formats
+
+**Paragraph Submenu**:
+- Bullet list, Numbered list, Task list
+- Heading 1-6 (Ctrl+Alt+1-6), Body (Ctrl+Alt+0)
+- Quote
+- Mutually exclusive checkmarks for heading/body
+
+**Insert Submenu**:
+- Image, Video
+- Table, Horizontal rule
+- Code block, Math block, PlantUML block
 
 **Features**:
-- Auto-flip positioning when near viewport edges
-- Measures actual rendered size via `useLayoutEffect`
-- Hidden until measured to prevent position flash
-- Shows keyboard shortcuts for items
-- Highlights active formatting states
+- Submenus open on hover with 150ms delay
+- Auto-flip positioning when near viewport edges (horizontal and vertical)
+- Uses DOM traversal in `useLayoutEffect` for submenu positioning
+- Keyboard navigation: Arrow keys, Enter, Escape
 
 **State**:
 | State | Type | Description |
 |-------|------|-------------|
 | isOpen | boolean | Menu visibility |
 | clickPosition | {x, y} | Original click position |
-| adjustedPosition | {x, y} | Position after flip adjustment |
-| measured | boolean | Whether menu has been measured |
-
-**Event Handling**:
-- Right-click inside editor opens menu
-- Click outside or Escape closes menu
-- Clicking menu items executes action and closes
+| hasSelection | boolean | Whether text is selected |
+| selectedText | string | Selected text content |
 
 ---
 
@@ -176,6 +194,10 @@ interface SlashMenuRef {
 | ArrowDown | Next item |
 | Enter | Execute command |
 | Escape | Close menu |
+
+**Features**:
+- Auto-scroll: selected item scrolls into view on keyboard navigation
+- Custom scrollbar: thin dark scrollbar matching glass theme (Firefox + WebKit)
 
 **Style**: Dark glass effect with group headers and dividers
 

@@ -248,7 +248,8 @@ editor.chain().focus().toggleCodeBlock().run()
 
 **NodeView**:
 - KaTeX rendered display
-- Click to edit via prompt
+- Click to edit: converts node back to `$latex$` text for inline editing
+- When user finishes editing, InputRule re-renders to math node
 
 **InputRule**: Typing `$...$` auto-converts
 
@@ -279,10 +280,20 @@ $$
 |-----------|------|-------------|
 | latex | string | LaTeX source |
 
-**NodeView**:
-- Textarea input above
-- Live KaTeX preview below
-- Escape key exits editing
+**NodeView** (Collapsed/Expanded pattern):
+- **Collapsed state (default)**: Shows only KaTeX preview, textarea hidden
+- **Expanded state (on select)**: Shows only editable textarea, preview hidden
+- Uses `selectNode`/`deselectNode` callbacks for atom nodes
+- Click on preview enters edit mode
+- Escape key or blur exits edit mode
+- Empty content starts in expanded mode
+
+**Keyboard navigation at boundaries**:
+- Backspace at position 0: deletes entire node
+- Arrow Up on first line: exits to block before
+- Arrow Down on last line: exits to block after
+- Arrow Left at position 0: exits to block before
+- Arrow Right at end: exits to block after
 
 **InputRule**: Typing `$$` auto-creates
 
@@ -302,13 +313,23 @@ $$
 **Rendering**:
 - Uses plantuml-encoder to encode
 - Fetches `https://www.plantuml.com/plantuml/svg/{encoded}`
+- Loading indicator shown during network request
 
-**Debounce**: 500ms
+**NodeView** (Collapsed/Expanded pattern):
+- **Collapsed state (default)**: Shows only SVG preview, textarea hidden
+- **Expanded state (on select)**: Shows only editable textarea, preview hidden
+- Uses `selectNode`/`deselectNode` callbacks for atom nodes
+- Click on preview enters edit mode
+- Escape key or blur exits edit mode
+- Empty/default content starts in expanded mode
+- Placeholder text for empty diagrams
 
-**NodeView**:
-- Textarea input above
-- SVG preview below
-- Escape key exits editing
+**Keyboard navigation at boundaries**:
+- Backspace at position 0: deletes entire node
+- Arrow Up on first line: exits to block before
+- Arrow Down on last line: exits to block after
+- Arrow Left at position 0: exits to block before
+- Arrow Right at end: exits to block after
 
 **InputRule**: Typing ` ```plantuml ` auto-creates
 

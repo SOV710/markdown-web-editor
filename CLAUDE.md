@@ -74,14 +74,32 @@ Extensions without standard Markdown syntax serialize as raw HTML with `html: tr
 
 | Node | Syntax | Description |
 |------|--------|-------------|
-| MathInline | `$...$` | KaTeX inline math, click to edit, paste rule support |
-| MathBlock | `$$...$$` | KaTeX block math with textarea + live preview |
-| PlantUMLBlock | ` ```plantuml ` | Encodes to plantuml.com SVG, 500ms debounce |
+| MathInline | `$...$` | KaTeX inline math, click converts to editable `$latex$` text, paste rule support |
+| MathBlock | `$$...$$` | KaTeX block math with collapsed/expanded NodeView toggle |
+| PlantUMLBlock | ` ```plantuml ` | PlantUML diagrams with collapsed/expanded NodeView toggle, encodes to plantuml.com SVG |
 | Image | `![alt](url)` + raw HTML | Resizable image with InputRule, PasteRule, drag-and-drop, load fallback |
 | VideoBlock | `@[title](url)` | Resizable video with InputRule, PasteRule, load fallback |
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 | Highlight | `==...==` | Marker pen style highlighting |
 | TyporaMode | - | Shows heading markers when cursor inside heading |
+
+### Collapsed/Expanded NodeView Pattern
+
+MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
+
+- **Collapsed state (default)**: Shows only rendered result (KaTeX formula / PlantUML SVG), textarea hidden
+- **Expanded state (on select)**: Shows only editable textarea, preview hidden
+- Uses ProseMirror `selectNode`/`deselectNode` callbacks for atom nodes
+- Click on preview enters edit mode
+- Escape key or blur exits edit mode
+- Empty content starts in expanded mode immediately
+
+**Keyboard navigation at boundaries** (both extensions):
+- Backspace at position 0: deletes entire node
+- Arrow Up on first line: exits to block before
+- Arrow Down on last line: exits to block after
+- Arrow Left at position 0: exits to block before
+- Arrow Right at end: exits to block after
 
 ### Styling
 
@@ -94,8 +112,8 @@ Extensions without standard Markdown syntax serialize as raw HTML with `html: tr
 
 ### UI Components
 
-- **ContextMenu**: Right-click menu rendered via `createPortal` to `document.body` to avoid ProseMirror DOM conflicts
-- **SlashMenu**: Command palette triggered by `/`, positioned via Tippy.js
+- **ContextMenu**: Right-click menu with nested submenus (Format▸, Paragraph▸, Insert▸), rendered via `createPortal` to `document.body`
+- **SlashMenu**: Command palette triggered by `/`, positioned via Tippy.js, custom scrollbar with auto-scroll on keyboard navigation
 - **TableMenu**: Floating menu for table operations when cursor is in table
 - **ViewToggle**: Switches between rich text and source mode
 
@@ -119,3 +137,5 @@ Extensions without standard Markdown syntax serialize as raw HTML with `html: tr
 - **Placeholder**: Uses TipTap Placeholder extension with per-node-type function for heading placeholders ("Heading 1", "Heading 2", etc.)
 - **Link/Image/Video insertion**: Inserts plain Markdown syntax `[]()` / `![]()` / `@[]()` rather than using dialogs; InputRules auto-convert to rich nodes when user types closing `)`
 - **Media load fallback**: Image and VideoBlock NodeViews show `!`/`@` prefix with link when media fails to load
+- **MathInline editing**: Click on rendered math converts it back to editable `$latex$` text; InputRule re-renders when user finishes editing
+- **Context menu submenus**: Uses DOM traversal in `useLayoutEffect` to find trigger button and parent panel for positioning; flips horizontally/vertically when overflowing viewport

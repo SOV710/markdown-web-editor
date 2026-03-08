@@ -242,21 +242,29 @@ Component-level styles use CSS Modules (`*.module.css`).
 
 | Class | Description |
 |-------|-------------|
-| `.menu` | Menu container, dark glass effect, fixed position |
-| `.section` | Menu section |
-| `.sectionTitle` | Section title, uppercase 11px |
-| `.item` | Menu item, flex layout |
-| `.itemActive` | Active state indicator |
-| `.shortcut` | Keyboard shortcut display |
+| `.panel` | Menu panel, dark glass effect, fixed position, min-width 220px |
+| `.item` | Menu item, flex layout with gap 8px |
+| `.itemCheck` | Checkmark gutter (16px width) |
+| `.itemLabel` | Item label, flex: 1 |
+| `.itemShortcut` | Keyboard shortcut display, monospace 11px |
+| `.itemArrow` | Submenu arrow indicator (▸) |
+| `.disabled` | Disabled item state, opacity 0.4 |
+| `.separator` | Menu separator line |
+| `.submenuWrapper` | Wrapper for submenu items, position: relative |
 
 ### SlashMenu.module.css Main Classes
 
 | Class | Description |
 |-------|-------------|
-| `.container` | Menu container, dark glass effect |
+| `.container` | Menu container, dark glass effect, custom scrollbar |
 | `.groupHeader` | Group header, 11px uppercase |
 | `.groupDivider` | Group separator |
 | `.item` | Menu item, flex layout |
 | `.icon` | Icon container, 32x32px |
 | `.title` | Title, 14px white |
 | `.description` | Description, 12px semi-transparent |
+| `.empty` | Empty state message |
+
+**Custom Scrollbar**:
+- Firefox: `scrollbar-width: thin`, `scrollbar-color: rgba(255,255,255,0.15) transparent`
+- WebKit: 6px width, transparent track, semi-transparent thumb

@@ -16,7 +16,7 @@ A rich text editor with bidirectional Markdown conversion, built on TipTap 3 (Pr
 - **Resizable media**: Images and videos with drag-to-resize (10-100% width)
 - **Slash commands**: `/` triggered command palette for quick insertion
 - **Live heading markers**: Typora-style heading syntax shown when cursor is inside headings
-- **Context menu**: Right-click menu for formatting, inserting, and clipboard operations
+- **Context menu**: Right-click menu with nested submenus for formatting, paragraph styles, inserting blocks, and clipboard operations
 
 ## Quick Start
 
