@@ -61,7 +61,7 @@ Start typing, or press `/` for commands…
 | PlantUMLBlock | - |
 | VideoBlock | - |
 | Highlight | - |
-| LiveMarkdown | - |
+| TyporaMode | - |
 | SlashCommand | suggestion: slashCommandSuggestion |
 
 **Placeholder Configuration**:

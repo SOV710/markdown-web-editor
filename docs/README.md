@@ -52,7 +52,7 @@ src/
 │   ├── table.ts             # Tables
 │   ├── task-list.ts         # Task lists
 │   ├── custom-keymap.ts     # Custom keyboard shortcuts
-│   ├── live-markdown.ts     # Typora-style syntax preview
+│   ├── typora-mode.ts       # Typora-style heading markers
 │   └── index.ts             # Barrel export
 ├── lib/                 # Utility functions
 │   ├── use-markdown-editor.ts       # Editor initialization hook
@@ -93,5 +93,5 @@ pnpm lint     # ESLint check
 | Links | Plain Markdown syntax insertion |
 | Slash commands | `/` triggered quick insertion with grouping and search |
 | Dual view | Rich text / Markdown source toggle (Ctrl+M) |
-| Live Markdown | Typora-style syntax preview when cursor is inside formatted text |
+| Heading markers | Typora-style heading syntax shown when cursor is inside headings |
 | Context menu | Right-click for formatting, insertion, and clipboard operations |

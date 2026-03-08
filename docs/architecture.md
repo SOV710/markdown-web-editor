@@ -71,7 +71,7 @@ TipTap extensions fall into three categories:
 |------|-------------|----------|
 | Node | Block or inline content | Image, Table, MathBlock, VideoBlock |
 | Mark | Text decoration | Underline, Link, Highlight |
-| Extension | Feature enhancement | SlashCommand, CustomKeymap, LiveMarkdown |
+| Extension | Feature enhancement | SlashCommand, CustomKeymap, TyporaMode |
 
 ## Key Design Decisions
 
@@ -116,11 +116,11 @@ ContextMenu renders via `createPortal(element, document.body)`:
 - Rendering inside ProseMirror-managed DOM causes `insertBefore` errors
 - Portal ensures menu DOM is managed separately
 
-### 6. Live Markdown Preview
+### 6. Live Heading Markers
 
-LiveMarkdown extension uses ProseMirror decorations:
-- Adds widget decorations for Markdown syntax markers
-- Shows `**` around bold text, `#` before headings when cursor is inside
+TyporaMode extension uses ProseMirror decorations:
+- Adds widget decorations for Markdown heading markers (`#`, `##`, etc.)
+- Shows markers when cursor is inside a heading block
 - Hides markers when cursor moves elsewhere (Typora-style)
 - Wrapped in try-catch returning `DecorationSet.empty` on error
 

@@ -15,7 +15,7 @@ A rich text editor with bidirectional Markdown conversion, built on TipTap 3 (Pr
 - **PlantUML diagrams**: Render UML diagrams via plantuml.com
 - **Resizable media**: Images and videos with drag-to-resize (10-100% width)
 - **Slash commands**: `/` triggered command palette for quick insertion
-- **Live Markdown preview**: Typora-style syntax markers shown when cursor is inside formatted text
+- **Live heading markers**: Typora-style heading syntax shown when cursor is inside headings
 - **Context menu**: Right-click menu for formatting, inserting, and clipboard operations
 
 ## Quick Start
@@ -74,7 +74,7 @@ src/
 │   ├── image.ts               # Resizable images
 │   ├── video-block.ts         # Resizable video player
 │   ├── highlight.ts           # Highlight mark (==...==)
-│   ├── live-markdown.ts       # Typora-style syntax preview
+│   ├── typora-mode.ts         # Typora-style heading markers
 │   ├── slash-command.tsx      # Slash command extension
 │   └── ...
 ├── lib/                   # Hooks and utilities

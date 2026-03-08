@@ -140,12 +140,6 @@ Global styles are in `src/styles/`, component styles use CSS Modules.
 | Class | Description |
 |-------|-------------|
 | `.live-md-heading-marker` | Heading markers (`#`, `##`, etc.) |
-| `.live-md-mark` | Generic mark markers |
-| `.live-md-bold` | Bold markers (`**`) |
-| `.live-md-italic` | Italic markers (`_`) |
-| `.live-md-strike` | Strikethrough markers (`~~`) |
-| `.live-md-code` | Inline code markers (`` ` ``) |
-| `.live-md-highlight` | Highlight markers (`==`) |
 
 ---
 

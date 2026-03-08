@@ -17,7 +17,7 @@ All extensions are in `src/extensions/` and exported via `index.ts`.
 - [SlashCommand](#slashcommand)
 - [CustomKeymap](#customkeymap)
 - [Highlight](#highlight)
-- [LiveMarkdown](#livemarkdown)
+- [TyporaMode](#typoramode)
 
 ---
 
@@ -83,6 +83,8 @@ editor.chain().focus().unsetLink().run()
   <div class="resize-handle resize-handle-right"></div>
 </div>
 ```
+
+**Drag-and-Drop**: Dropping image files inserts `![filename]()` placeholder at drop position
 
 **Markdown Serialization**: Raw HTML
 ```html
@@ -223,6 +225,8 @@ editor.chain().focus().toggleCodeBlock().run()
 - Click to edit via prompt
 
 **InputRule**: Typing `$...$` auto-converts
+
+**PasteRule**: Pasting text containing `$...$` auto-converts to math nodes
 
 **Markdown Serialization**:
 ```
@@ -372,35 +376,29 @@ editor.chain().focus().toggleHighlight().run()
 
 ---
 
-## LiveMarkdown
+## TyporaMode
 
-**File**: `live-markdown.ts`
+**File**: `typora-mode.ts`
 
 **Type**: Extension
 
-**Purpose**: Typora-style live Markdown preview
+**Purpose**: Typora-style live heading markers
 
 **Behavior**:
-- Shows Markdown syntax markers when cursor is inside formatted text
+- Shows Markdown heading markers (`#`, `##`, etc.) when cursor is inside a heading
 - Hides markers when cursor moves elsewhere
-- Headings show `# `, `## `, etc. markers
-- Marks show their syntax: `**` for bold, `_` for italic, `` ` `` for code, `~~` for strikethrough, `==` for highlight
+- Uses ProseMirror `Decoration.widget` for markers
+- Decorations callback wrapped in try-catch, returns `DecorationSet.empty` on error
 
 **Supported Markers**:
-| Mark | Prefix | Suffix |
-|------|--------|--------|
-| bold | `**` | `**` |
-| italic | `_` | `_` |
-| strike | `~~` | `~~` |
-| code | `` ` `` | `` ` `` |
-| highlight | `==` | `==` |
-
-**Implementation**:
-- Uses ProseMirror `Decoration.widget` for markers
-- Decorations callback wrapped in try-catch
-- Returns `DecorationSet.empty` on error (cosmetic failure only)
+| Level | Marker |
+|-------|--------|
+| 1 | `# ` |
+| 2 | `## ` |
+| 3 | `### ` |
+| 4 | `#### ` |
+| 5 | `##### ` |
+| 6 | `###### ` |
 
 **CSS Classes**:
-- `.live-md-heading-marker` - Heading markers
-- `.live-md-mark` - Generic mark markers
-- `.live-md-bold`, `.live-md-italic`, etc. - Mark-specific styling
+- `.live-md-heading-marker` - Heading marker styling

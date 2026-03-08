@@ -74,14 +74,14 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 
 | Node | Syntax | Description |
 |------|--------|-------------|
-| MathInline | `$...$` | KaTeX inline math, click to edit |
+| MathInline | `$...$` | KaTeX inline math, click to edit, paste rule support |
 | MathBlock | `$$...$$` | KaTeX block math with textarea + live preview |
 | PlantUMLBlock | ` ```plantuml ` | Encodes to plantuml.com SVG, 500ms debounce |
-| Image | raw HTML | Resizable image with custom NodeView (10-100% width) |
+| Image | raw HTML | Resizable image with custom NodeView (10-100% width), drag-and-drop support |
 | VideoBlock | raw HTML | Resizable video player with custom NodeView |
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 | Highlight | `==...==` | Marker pen style highlighting |
-| LiveMarkdown | - | Typora-style live preview (shows syntax when cursor inside) |
+| TyporaMode | - | Shows heading markers when cursor inside heading |
 
 ### Styling
 
@@ -115,6 +115,6 @@ Extensions without standard Markdown syntax (Image, VideoBlock) serialize as raw
 ### Important Implementation Notes
 
 - **Portal rendering**: ContextMenu uses `createPortal` to render outside ProseMirror DOM tree, preventing React/ProseMirror DOM conflicts that cause `insertBefore` errors
-- **LiveMarkdown safety**: The decorations callback is wrapped in try-catch, returning `DecorationSet.empty` on error (cosmetic failure only)
+- **TyporaMode safety**: The decorations callback is wrapped in try-catch, returning `DecorationSet.empty` on error (cosmetic failure only)
 - **Placeholder**: Uses TipTap Placeholder extension with per-node-type function for heading placeholders ("Heading 1", "Heading 2", etc.)
 - **Link/Image insertion**: Inserts plain Markdown syntax `[]()` / `![]()` rather than using dialogs
