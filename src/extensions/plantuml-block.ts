@@ -110,12 +110,14 @@ export const PlantUMLBlock = Node.create({
       dom.classList.add("plantuml-block");
       dom.setAttribute("data-type", "plantuml-block");
 
+      // Create textarea (hidden by default in collapsed state)
       const textarea = document.createElement("textarea");
       textarea.classList.add("plantuml-block-input");
       textarea.value = node.attrs.source as string;
       textarea.placeholder = "@startuml\nAlice -> Bob: Hello\n@enduml";
       textarea.rows = 6;
 
+      // Create preview container (visible by default in collapsed state)
       const preview = document.createElement("div");
       preview.classList.add("plantuml-block-preview");
 
@@ -123,79 +125,189 @@ export const PlantUMLBlock = Node.create({
       img.classList.add("plantuml-block-img");
       preview.appendChild(img);
 
+      const loadingDiv = document.createElement("div");
+      loadingDiv.classList.add("plantuml-block-loading");
+      loadingDiv.textContent = "Rendering...";
+      loadingDiv.style.display = "none";
+      preview.appendChild(loadingDiv);
+
       const errorDiv = document.createElement("div");
       errorDiv.classList.add("plantuml-error");
       errorDiv.style.display = "none";
       preview.appendChild(errorDiv);
 
-      let debounceTimer: ReturnType<typeof setTimeout>;
+      // State management
+      let isEditing = false;
+      let currentNode = node;
 
       const renderDiagram = (source: string) => {
-        if (!source.trim()) {
+        const trimmed = source.trim();
+        const isDefault = !trimmed || trimmed === "@startuml\n\n@enduml" || trimmed === "@startuml\n@enduml";
+
+        if (isDefault) {
           img.style.display = "none";
+          loadingDiv.style.display = "none";
           errorDiv.style.display = "none";
+          // Show placeholder for empty diagrams
+          const placeholder = preview.querySelector(".plantuml-placeholder");
+          if (!placeholder) {
+            const p = document.createElement("span");
+            p.classList.add("plantuml-placeholder");
+            p.textContent = "Click to add diagram";
+            preview.appendChild(p);
+          }
           return;
         }
+
+        // Remove placeholder if exists
+        const placeholder = preview.querySelector(".plantuml-placeholder");
+        if (placeholder) placeholder.remove();
 
         try {
           const encoded = encode(source);
           const url = `${PLANTUML_SERVER}/${encoded}`;
-          img.src = url;
-          img.alt = "PlantUML Diagram";
-          img.style.display = "block";
+
+          // Show loading indicator
+          loadingDiv.style.display = "block";
+          img.style.display = "none";
           errorDiv.style.display = "none";
 
+          img.src = url;
+          img.alt = "PlantUML Diagram";
+
+          img.onload = () => {
+            loadingDiv.style.display = "none";
+            img.style.display = "block";
+            errorDiv.style.display = "none";
+          };
+
           img.onerror = () => {
+            loadingDiv.style.display = "none";
             img.style.display = "none";
             errorDiv.textContent = "Failed to render diagram";
             errorDiv.style.display = "block";
           };
-        } catch (error) {
+        } catch {
+          loadingDiv.style.display = "none";
           img.style.display = "none";
           errorDiv.textContent = "Invalid PlantUML syntax";
           errorDiv.style.display = "block";
         }
       };
 
+      const autoResizeTextarea = () => {
+        textarea.style.height = "auto";
+        textarea.style.height = Math.max(80, textarea.scrollHeight) + "px";
+      };
+
+      const enterEditMode = () => {
+        if (isEditing) return;
+        isEditing = true;
+
+        // Hide preview, show textarea
+        preview.style.display = "none";
+        textarea.style.display = "block";
+
+        // Sync textarea value from current node attrs
+        textarea.value = currentNode.attrs.source as string;
+        autoResizeTextarea();
+
+        // Focus the textarea
+        textarea.focus();
+      };
+
+      const exitEditMode = () => {
+        if (!isEditing) return;
+
+        // Save changes if value differs
+        const newSource = textarea.value;
+        if (newSource !== currentNode.attrs.source) {
+          if (typeof getPos === "function") {
+            const pos = getPos();
+            if (pos !== undefined) {
+              editor.view.dispatch(
+                editor.view.state.tr.setNodeMarkup(pos, undefined, { source: newSource })
+              );
+            }
+          }
+        }
+
+        isEditing = false;
+
+        // Hide textarea, show preview
+        textarea.style.display = "none";
+        preview.style.display = "flex";
+
+        // Re-render diagram with current value
+        renderDiagram(textarea.value);
+      };
+
+      // Initial render
       renderDiagram(node.attrs.source as string);
 
+      // Check if content is empty or default
+      const isEmptyOrDefault = (source: string) => {
+        const trimmed = source.trim();
+        return !trimmed || trimmed === "@startuml\n\n@enduml" || trimmed === "@startuml\n@enduml";
+      };
+
+      // If content is empty or default, start in expanded mode
+      if (isEmptyOrDefault(node.attrs.source as string)) {
+        // Start expanded
+        preview.style.display = "none";
+        textarea.style.display = "block";
+        isEditing = true;
+        // Focus will be called by selectNode
+      } else {
+        // Start collapsed
+        preview.style.display = "flex";
+        textarea.style.display = "none";
+      }
+
+      // Click on preview enters edit mode
+      preview.addEventListener("click", () => {
+        enterEditMode();
+      });
+
+      // Textarea input - auto-resize
       textarea.addEventListener("input", () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          renderDiagram(textarea.value);
-        }, 500);
+        autoResizeTextarea();
       });
 
+      // Textarea blur exits edit mode
       textarea.addEventListener("blur", () => {
-        if (typeof getPos !== "function") return;
-        const pos = getPos();
-        if (pos === undefined) return;
-
-        editor
-          .chain()
-          .focus()
-          .command(({ tr }) => {
-            tr.setNodeMarkup(pos, undefined, { source: textarea.value });
-            return true;
-          })
-          .run();
+        // Small delay to allow selectNode/deselectNode to fire first
+        setTimeout(() => {
+          if (isEditing && document.activeElement !== textarea) {
+            exitEditMode();
+          }
+        }, 0);
       });
 
+      // Escape key exits edit mode
       textarea.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          textarea.blur();
+          e.preventDefault();
+          exitEditMode();
           editor.commands.focus();
         }
       });
 
-      dom.appendChild(textarea);
       dom.appendChild(preview);
+      dom.appendChild(textarea);
 
       return {
         dom,
+        selectNode: () => {
+          enterEditMode();
+        },
+        deselectNode: () => {
+          exitEditMode();
+        },
         update: (updatedNode) => {
           if (updatedNode.type.name !== "plantumlBlock") return false;
-          if (document.activeElement !== textarea) {
+          currentNode = updatedNode;
+          if (!isEditing) {
             textarea.value = updatedNode.attrs.source as string;
             renderDiagram(updatedNode.attrs.source as string);
           }
@@ -205,9 +317,6 @@ export const PlantUMLBlock = Node.create({
           return event.target === textarea;
         },
         ignoreMutation: () => true,
-        destroy: () => {
-          clearTimeout(debounceTimer);
-        },
       };
     };
   },
