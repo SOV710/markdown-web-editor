@@ -24,6 +24,10 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
   const [markdownSource, setMarkdownSource] = useState("");
 
   // Sync markdown source when switching views
+  // NOTE: CommonMark collapses multiple consecutive blank lines into one.
+  // This is by-design per the CommonMark spec. Extra blank lines typed in
+  // source mode will be reduced to single blank lines after switching views.
+  // Single blank lines (paragraph separators) ARE preserved correctly.
   const handleModeChange = useCallback(
     (newMode: ViewMode) => {
       if (!editor) return;
