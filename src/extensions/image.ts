@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node, mergeAttributes, InputRule, PasteRule } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
@@ -113,6 +113,29 @@ export const Image = Node.create({
       img.title = (node.attrs.title as string) || "";
       img.style.width = "100%";
       img.draggable = false;
+
+      // Handle load failure with fallback link display
+      img.onerror = () => {
+        // Replace img element with a fallback link display
+        container.innerHTML = ""; // clear resize handles and img
+        container.classList.remove("resizable-image");
+        container.classList.add("image-fallback");
+
+        const prefix = document.createElement("span");
+        prefix.textContent = "!";
+        prefix.className = "image-fallback-prefix";
+
+        const linkEl = document.createElement("a");
+        linkEl.href = node.attrs.src as string;
+        linkEl.textContent = (node.attrs.alt as string) || (node.attrs.src as string);
+        linkEl.className = "image-fallback-link";
+        linkEl.target = "_blank";
+        linkEl.rel = "noopener noreferrer";
+        linkEl.title = node.attrs.src as string;
+
+        container.appendChild(prefix);
+        container.appendChild(linkEl);
+      };
 
       const leftHandle = document.createElement("div");
       leftHandle.classList.add("resize-handle", "resize-handle-left");
@@ -248,6 +271,37 @@ export const Image = Node.create({
             view.dispatch(tr);
             return true;
           },
+        },
+      }),
+    ];
+  },
+
+  addInputRules() {
+    return [
+      new InputRule({
+        // Match ![alt](url) when the closing ) is typed
+        find: /!\[([^\]]*)\]\(([^)]+)\)$/,
+        handler: ({ state, range, match }) => {
+          const alt = match[1] ?? "";
+          const src = match[2] ?? "";
+          const { tr } = state;
+
+          // Replace the text with an image node
+          tr.replaceWith(range.from, range.to, this.type.create({ src, alt }));
+        },
+      }),
+    ];
+  },
+
+  addPasteRules() {
+    return [
+      new PasteRule({
+        find: /!\[([^\]]*)\]\(([^)]+)\)/g,
+        handler: ({ state, range, match }) => {
+          const alt = match[1] ?? "";
+          const src = match[2] ?? "";
+          const { tr } = state;
+          tr.replaceWith(range.from, range.to, this.type.create({ src, alt }));
         },
       }),
     ];

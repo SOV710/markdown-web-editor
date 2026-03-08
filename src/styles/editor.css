@@ -402,3 +402,23 @@
   opacity: 0.6;
   user-select: none;
 }
+
+/* ── Image Fallback ── */
+.tiptap .image-fallback {
+  display: inline;
+  margin: 0;
+}
+
+.tiptap .image-fallback-prefix {
+  color: var(--color-text-secondary);
+}
+
+.tiptap .image-fallback-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tiptap .image-fallback-link:hover {
+  text-decoration: underline;
+}
