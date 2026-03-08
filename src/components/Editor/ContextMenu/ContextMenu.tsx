@@ -42,66 +42,48 @@ function MenuPanel({ items, position, onClose, isSubmenu = false }: MenuPanelPro
   const submenuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const itemRefs = useRef<(HTMLButtonElement | HTMLDivElement | null)[]>([]);
 
-  // Measure and adjust position
+  // Root menu: measure and adjust position
   useLayoutEffect(() => {
-    if (!panelRef.current) return;
+    if (isSubmenu || !panelRef.current) return;
 
     const rect = panelRef.current.getBoundingClientRect();
     const padding = 8;
-    let x: number;
-    let y: number;
+    let x = position.x;
+    let y = position.y;
 
-    if (isSubmenu) {
-      // The submenu panel is inside a .submenuWrapper div.
-      // The trigger button is the sibling button within the wrapper.
-      // The parent panel is the grandparent .panel element.
-      const wrapper = panelRef.current.parentElement; // .submenuWrapper
-      const triggerButton = wrapper?.querySelector("button");
-      const parentPanel = wrapper?.closest(`.${styles.panel}`);
-
-      if (triggerButton && parentPanel) {
-        const triggerRect = triggerButton.getBoundingClientRect();
-        const parentRect = parentPanel.getBoundingClientRect();
-
-        // X: flush to right edge of parent panel
-        x = parentRect.right - 2;
-        if (x + rect.width + padding > window.innerWidth) {
-          x = parentRect.left - rect.width + 2;
-        }
-
-        // Y: top-aligned with trigger button
-        y = triggerRect.top;
-        if (y + rect.height + padding > window.innerHeight) {
-          y = triggerRect.bottom - rect.height;
-        }
-
-        y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
-      } else {
-        // Fallback: position near click
-        x = position.x;
-        y = position.y;
-      }
-
-      x = Math.max(padding, Math.min(x, window.innerWidth - rect.width - padding));
-    } else {
-      // Root menu positioning
-      x = position.x;
-      y = position.y;
-
-      if (x + rect.width + padding > window.innerWidth) {
-        x = position.x - rect.width;
-      }
-      if (y + rect.height + padding > window.innerHeight) {
-        y = position.y - rect.height;
-      }
-
-      x = Math.max(padding, Math.min(x, window.innerWidth - rect.width - padding));
-      y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
+    if (x + rect.width + padding > window.innerWidth) {
+      x = position.x - rect.width;
     }
+    if (y + rect.height + padding > window.innerHeight) {
+      y = position.y - rect.height;
+    }
+
+    x = Math.max(padding, Math.min(x, window.innerWidth - rect.width - padding));
+    y = Math.max(padding, Math.min(y, window.innerHeight - rect.height - padding));
 
     setAdjustedPosition({ x, y });
     setMeasured(true);
   }, [position, isSubmenu]);
+
+  // Submenu: CSS handles positioning, just check for overflow and flip
+  useLayoutEffect(() => {
+    if (!isSubmenu || !panelRef.current) return;
+
+    const rect = panelRef.current.getBoundingClientRect();
+    const padding = 8;
+
+    // Horizontal flip: if overflows right, move to left side
+    if (rect.right + padding > window.innerWidth) {
+      panelRef.current.style.left = "auto";
+      panelRef.current.style.right = "100%";
+    }
+
+    // Vertical flip: if overflows bottom, align bottom instead of top
+    if (rect.bottom + padding > window.innerHeight) {
+      panelRef.current.style.top = "auto";
+      panelRef.current.style.bottom = "0";
+    }
+  }, [isSubmenu]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -181,8 +163,8 @@ function MenuPanel({ items, position, onClose, isSubmenu = false }: MenuPanelPro
   return (
     <div
       ref={panelRef}
-      className={styles.panel}
-      style={{
+      className={isSubmenu ? styles.submenuPanel : styles.panel}
+      style={isSubmenu ? undefined : {
         left: adjustedPosition.x,
         top: adjustedPosition.y,
         visibility: measured ? "visible" : "hidden",
