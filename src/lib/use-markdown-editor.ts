@@ -20,7 +20,7 @@ import {
   VideoBlock,
   SlashCommand,
   Highlight,
-  LiveMarkdown,
+  TyporaMode,
 } from "@/extensions";
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
@@ -84,7 +84,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       PlantUMLBlock,
       VideoBlock,
       Highlight,
-      LiveMarkdown,
+      TyporaMode,
       SlashCommand.configure({
         suggestion: slashCommandSuggestion,
       }),

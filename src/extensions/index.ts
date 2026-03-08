@@ -11,4 +11,4 @@ export { PlantUMLBlock } from "./plantuml-block";
 export { VideoBlock } from "./video-block";
 export { SlashCommand } from "./slash-command";
 export { Highlight } from "./highlight";
-export { LiveMarkdown } from "./live-markdown";
+export { TyporaMode } from "./typora-mode";
