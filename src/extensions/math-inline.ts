@@ -1,4 +1,4 @@
-import { Node, mergeAttributes, InputRule } from "@tiptap/core";
+import { Node, mergeAttributes, InputRule, PasteRule } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { inputRegex } from "./math-utils";
 import katex from "katex";
@@ -200,6 +200,23 @@ export const MathInline = Node.create({
             range.to,
             this.type.create({ latex })
           );
+        },
+      }),
+    ];
+  },
+
+  addPasteRules() {
+    return [
+      new PasteRule({
+        // Match $...$ but not across line breaks (block math uses $$)
+        // Use /g flag for paste rules to find all matches in pasted text
+        find: /(?:^|[^$])\$([^$\n]+)\$/g,
+        handler: ({ state, range, match }) => {
+          const latex = match[1];
+          if (!latex) return;
+
+          const { tr } = state;
+          tr.replaceWith(range.from, range.to, this.type.create({ latex }));
         },
       }),
     ];
