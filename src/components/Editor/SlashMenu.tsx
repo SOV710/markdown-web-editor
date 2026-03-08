@@ -5,6 +5,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useRef,
 } from "react";
 import type { SlashCommandItem, SlashCommandGroup } from "@/extensions/slash-command";
 import styles from "./SlashMenu.module.css";
@@ -31,6 +32,7 @@ const GROUP_ORDER: SlashCommandGroup[] = ["text", "list", "block", "media", "adv
 export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     // Group items while preserving order
     const groupedItems = useMemo(() => {
@@ -84,6 +86,12 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
       setSelectedIndex(0);
     }, [items]);
 
+    // Auto-scroll selected item into view
+    useEffect(() => {
+      const selected = containerRef.current?.querySelector('[data-selected="true"]');
+      selected?.scrollIntoView({ block: "nearest" });
+    }, [selectedIndex]);
+
     useImperativeHandle(ref, () => ({
       onKeyDown: ({ event }) => {
         if (event.key === "ArrowUp") {
@@ -117,7 +125,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
     let flatIndex = 0;
 
     return (
-      <div className={styles.container}>
+      <div ref={containerRef} className={styles.container}>
         {groupedItems.map((group, groupIndex) => (
           <div key={group.group}>
             {groupIndex > 0 && <div className={styles.groupDivider} />}
