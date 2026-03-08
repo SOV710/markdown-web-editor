@@ -14,6 +14,10 @@ interface MarkdownItState {
   src: string;
   line: number;
   lineMax: number;
+  bMarks: number[]; // byte offset of each line start
+  eMarks: number[]; // byte offset of each line end
+  tShift: number[]; // indent of first non-space char
+  sCount: number[]; // indent level
   push(type: string, tag: string, nesting: number): {
     content: string;
     map: [number, number] | null;
@@ -90,58 +94,93 @@ export const MathBlock = Node.create({
         },
         parse: {
           setup(markdownit: MarkdownItInstance) {
-            // Add block rule for $$...$$
-            markdownit.block.ruler.before("fence", "math_block", (state: MarkdownItState, startLine: number, _endLine: number, silent: boolean) => {
-              const startPos = state.src.indexOf("$$", state.line);
-              if (startPos === -1) return false;
-
-              // Check if line starts with $$
-              const lineStart = state.src.lastIndexOf("\n", startPos) + 1;
-              const lineText = state.src.slice(lineStart, state.src.indexOf("\n", lineStart) || state.src.length);
-              if (!lineText.trim().startsWith("$$")) return false;
-
-              // Find closing $$
-              let pos = startPos + 2;
-              let foundEnd = false;
-              let endPos = pos;
-
-              while (pos < state.src.length) {
-                const idx = state.src.indexOf("$$", pos);
-                if (idx === -1) break;
-
-                // Check if it's on its own line
-                const beforeNewline = state.src.lastIndexOf("\n", idx);
-                const afterNewline = state.src.indexOf("\n", idx);
-                const line = state.src.slice(beforeNewline + 1, afterNewline === -1 ? undefined : afterNewline);
-                if (line.trim() === "$$") {
-                  endPos = idx;
-                  foundEnd = true;
-                  break;
+            // Add block rule for $$...$$ using correct markdown-it block rule API
+            markdownit.block.ruler.before(
+              "fence",
+              "math_block",
+              (
+                state: MarkdownItState,
+                startLine: number,
+                endLine: number,
+                silent: boolean
+              ) => {
+                // 1. Get the start position of the current line
+                const bMarkStart = state.bMarks[startLine];
+                const tShiftStart = state.tShift[startLine];
+                const eMarkStart = state.eMarks[startLine];
+                if (
+                  bMarkStart === undefined ||
+                  tShiftStart === undefined ||
+                  eMarkStart === undefined
+                ) {
+                  return false;
                 }
-                pos = idx + 2;
+
+                const lineStart = bMarkStart + tShiftStart;
+                const lineEnd = eMarkStart;
+                const lineText = state.src.slice(lineStart, lineEnd).trim();
+
+                // 2. Must start with exactly "$$" (optionally with trailing whitespace)
+                if (lineText !== "$$") return false;
+
+                // 3. Find closing "$$" on a subsequent line
+                let closingLine = startLine + 1;
+                let found = false;
+
+                while (closingLine < endLine) {
+                  const cBMark = state.bMarks[closingLine];
+                  const cTShift = state.tShift[closingLine];
+                  const cEMark = state.eMarks[closingLine];
+                  if (
+                    cBMark === undefined ||
+                    cTShift === undefined ||
+                    cEMark === undefined
+                  ) {
+                    closingLine++;
+                    continue;
+                  }
+
+                  const cLineStart = cBMark + cTShift;
+                  const cLineEnd = cEMark;
+                  const cLineText = state.src.slice(cLineStart, cLineEnd).trim();
+
+                  if (cLineText === "$$") {
+                    found = true;
+                    break;
+                  }
+                  closingLine++;
+                }
+
+                if (!found) return false;
+                if (silent) return true;
+
+                // 4. Extract content between opening and closing lines
+                const closingBMark = state.bMarks[closingLine];
+                if (closingBMark === undefined) return false;
+
+                const contentStart = eMarkStart + 1; // after opening $$ newline
+                const contentEnd = closingBMark; // before closing $$ line
+                const content = state.src.slice(contentStart, contentEnd).trim();
+
+                // 5. Create token
+                const token = state.push("math_block", "div", 0);
+                token.content = content;
+                token.map = [startLine, closingLine + 1];
+                token.attrSet("data-type", "math-block");
+                token.attrSet("data-latex", content);
+
+                // 6. Advance past closing line
+                state.line = closingLine + 1;
+
+                return true;
               }
-
-              if (!foundEnd) return false;
-
-              if (silent) return true;
-
-              // Extract content between $$
-              const content = state.src.slice(startPos + 2, endPos).trim();
-
-              const token = state.push("math_block", "div", 0);
-              token.content = content;
-              token.attrSet("data-type", "math-block");
-              token.attrSet("data-latex", content);
-
-              // Skip past the closing $$
-              const linesConsumed = state.src.slice(0, endPos + 2).split("\n").length;
-              state.line = startLine + linesConsumed;
-
-              return true;
-            });
+            );
 
             // Add renderer for math_block token
-            markdownit.renderer.rules.math_block = (tokens: Array<{ content: string }>, idx: number) => {
+            markdownit.renderer.rules.math_block = (
+              tokens: Array<{ content: string }>,
+              idx: number
+            ) => {
               const token = tokens[idx];
               if (!token) return "";
               const latex = token.content;
