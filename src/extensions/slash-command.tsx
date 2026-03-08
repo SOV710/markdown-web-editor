@@ -18,6 +18,7 @@ import {
   MathOperations,
   TreeStructure,
 } from "@phosphor-icons/react";
+import { insertMarkdownImage, insertMarkdownVideo } from "@/lib/link-utils";
 
 const SLASH_ICON_SIZE = 20;
 
@@ -129,30 +130,22 @@ export const slashCommandItems: SlashCommandItem[] = [
   },
   {
     title: "Image",
-    description: "Insert an image from URL",
+    description: "Insert an image with ![alt](url)",
     icon: <Image size={SLASH_ICON_SIZE} />,
     group: "media",
     command: ({ editor, range }) => {
-      const url = window.prompt("Image URL:");
-      if (url) {
-        editor.chain().focus().deleteRange(range).setImage({ src: url }).run();
-      }
+      editor.chain().focus().deleteRange(range).run();
+      insertMarkdownImage(editor);
     },
   },
   {
     title: "Video",
-    description: "Insert a video from URL",
+    description: "Insert a video with @[title](url)",
     icon: <VideoCamera size={SLASH_ICON_SIZE} />,
     group: "media",
     command: ({ editor, range }) => {
-      const url = window.prompt("Video URL:");
-      if (url) {
-        editor.chain().focus().deleteRange(range).run();
-        editor.commands.insertContent({
-          type: "videoBlock",
-          attrs: { src: url },
-        });
-      }
+      editor.chain().focus().deleteRange(range).run();
+      insertMarkdownVideo(editor);
     },
   },
   {

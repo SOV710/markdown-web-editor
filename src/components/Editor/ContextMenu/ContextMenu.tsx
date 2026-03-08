@@ -10,6 +10,7 @@ import {
   Code,
   Link,
   Image,
+  VideoCamera,
   Table,
   CodeBlock,
   MathOperations,
@@ -19,7 +20,7 @@ import {
   ClipboardText,
 } from "@phosphor-icons/react";
 import { findWordAtPosition } from "@/lib/word-segmentation";
-import { insertMarkdownLink, insertMarkdownImage } from "@/lib/link-utils";
+import { insertMarkdownLink, insertMarkdownImage, insertMarkdownVideo } from "@/lib/link-utils";
 import styles from "./ContextMenu.module.css";
 
 export interface ContextMenuProps {
@@ -287,6 +288,11 @@ export function ContextMenu({ editor }: ContextMenuProps) {
         icon: <Image size={16} weight="bold" />,
         label: "Image",
         action: () => insertMarkdownImage(editor),
+      },
+      {
+        icon: <VideoCamera size={16} weight="bold" />,
+        label: "Video",
+        action: () => insertMarkdownVideo(editor),
       },
       {
         icon: <Table size={16} weight="bold" />,
