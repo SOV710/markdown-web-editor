@@ -1,5 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 // Types for tiptap-markdown serialization
 interface MarkdownSerializerState {
@@ -205,6 +206,51 @@ export const Image = Node.create({
         },
       };
     };
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey("imageDrop"),
+        props: {
+          handleDrop(view, event, _slice, moved) {
+            // Only handle file drops, not internal node moves
+            if (moved || !event.dataTransfer?.files?.length) {
+              return false;
+            }
+
+            const files = Array.from(event.dataTransfer.files);
+            const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+
+            if (imageFiles.length === 0) return false;
+
+            event.preventDefault();
+
+            // Get drop position
+            const coordinates = view.posAtCoords({
+              left: event.clientX,
+              top: event.clientY,
+            });
+
+            if (!coordinates) return false;
+
+            // Insert Markdown image placeholder for each file
+            const { tr } = view.state;
+            let insertPos = coordinates.pos;
+
+            for (const file of imageFiles) {
+              const filename = file.name;
+              const text = `![${filename}]()`;
+              tr.insertText(text, insertPos);
+              insertPos += text.length;
+            }
+
+            view.dispatch(tr);
+            return true;
+          },
+        },
+      }),
+    ];
   },
 
   addCommands() {
