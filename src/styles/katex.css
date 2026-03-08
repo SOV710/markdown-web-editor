@@ -29,17 +29,33 @@
   border-radius: var(--radius-md);
 }
 
+/* Collapsed state: preview is clickable */
+.tiptap .math-block-preview {
+  cursor: pointer;
+  padding: var(--space-3);
+  text-align: center;
+  overflow-x: auto;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  transition: background 150ms ease;
+}
+
+.tiptap .math-block-preview:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+/* Hide input by default (collapsed state) - JS toggles display */
 .tiptap .math-block-input {
+  display: none;
   width: 100%;
   padding: var(--space-2);
-  margin-bottom: var(--space-2);
   font-family: var(--font-mono);
   font-size: 0.875em;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
   color: var(--color-text);
-  resize: vertical;
+  resize: none;
   min-height: 60px;
   transition: box-shadow 150ms ease;
 }
@@ -50,10 +66,10 @@
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-.tiptap .math-block-preview {
-  padding: var(--space-3);
-  text-align: center;
-  overflow-x: auto;
+/* Placeholder for empty math blocks */
+.tiptap .math-placeholder {
+  color: var(--color-text-placeholder);
+  font-style: italic;
 }
 
 /* Error state */

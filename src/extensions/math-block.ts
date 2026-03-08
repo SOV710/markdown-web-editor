@@ -205,64 +205,146 @@ export const MathBlock = Node.create({
       dom.classList.add("math-block");
       dom.setAttribute("data-type", "math-block");
 
+      // Create textarea (hidden by default in collapsed state)
       const textarea = document.createElement("textarea");
       textarea.classList.add("math-block-input");
       textarea.value = node.attrs.latex as string;
       textarea.placeholder = "Enter LaTeX...";
       textarea.rows = 3;
 
+      // Create preview container (visible by default in collapsed state)
       const preview = document.createElement("div");
       preview.classList.add("math-block-preview");
 
+      // State management
+      let isEditing = false;
+      let currentNode = node;
+
       const renderMath = (latex: string) => {
+        if (!latex.trim()) {
+          preview.innerHTML = '<span class="math-placeholder">Click to add formula</span>';
+          preview.classList.remove("math-error");
+          return;
+        }
         try {
           preview.innerHTML = katex.renderToString(latex, {
             throwOnError: false,
             displayMode: true,
           });
           preview.classList.remove("math-error");
-        } catch (error) {
+        } catch {
           preview.innerHTML = `<span class="math-error">Invalid LaTeX: ${latex}</span>`;
           preview.classList.add("math-error");
         }
       };
 
+      const autoResizeTextarea = () => {
+        textarea.style.height = "auto";
+        textarea.style.height = Math.max(60, textarea.scrollHeight) + "px";
+      };
+
+      const enterEditMode = () => {
+        if (isEditing) return;
+        isEditing = true;
+
+        // Hide preview, show textarea
+        preview.style.display = "none";
+        textarea.style.display = "block";
+
+        // Sync textarea value from current node attrs
+        textarea.value = currentNode.attrs.latex as string;
+        autoResizeTextarea();
+
+        // Focus the textarea
+        textarea.focus();
+      };
+
+      const exitEditMode = () => {
+        if (!isEditing) return;
+
+        // Save changes if value differs
+        const newLatex = textarea.value;
+        if (newLatex !== currentNode.attrs.latex) {
+          if (typeof getPos === "function") {
+            const pos = getPos();
+            if (pos !== undefined) {
+              editor.view.dispatch(
+                editor.view.state.tr.setNodeMarkup(pos, undefined, { latex: newLatex })
+              );
+            }
+          }
+        }
+
+        isEditing = false;
+
+        // Hide textarea, show preview
+        textarea.style.display = "none";
+        preview.style.display = "block";
+
+        // Re-render preview with current value
+        renderMath(textarea.value);
+      };
+
+      // Initial render
       renderMath(node.attrs.latex as string);
 
+      // If content is empty, start in expanded mode
+      if (!node.attrs.latex || !(node.attrs.latex as string).trim()) {
+        // Start expanded
+        preview.style.display = "none";
+        textarea.style.display = "block";
+        isEditing = true;
+        // Focus will be called by selectNode
+      } else {
+        // Start collapsed
+        preview.style.display = "block";
+        textarea.style.display = "none";
+      }
+
+      // Click on preview enters edit mode
+      preview.addEventListener("click", () => {
+        enterEditMode();
+      });
+
+      // Textarea input - auto-resize
       textarea.addEventListener("input", () => {
-        renderMath(textarea.value);
+        autoResizeTextarea();
       });
 
+      // Textarea blur exits edit mode
       textarea.addEventListener("blur", () => {
-        if (typeof getPos !== "function") return;
-        const pos = getPos();
-        if (pos === undefined) return;
-
-        editor
-          .chain()
-          .focus()
-          .command(({ tr }) => {
-            tr.setNodeMarkup(pos, undefined, { latex: textarea.value });
-            return true;
-          })
-          .run();
+        // Small delay to allow selectNode/deselectNode to fire first
+        setTimeout(() => {
+          if (isEditing && document.activeElement !== textarea) {
+            exitEditMode();
+          }
+        }, 0);
       });
 
+      // Escape key exits edit mode
       textarea.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          textarea.blur();
+          e.preventDefault();
+          exitEditMode();
           editor.commands.focus();
         }
       });
 
-      dom.appendChild(textarea);
       dom.appendChild(preview);
+      dom.appendChild(textarea);
 
       return {
         dom,
+        selectNode: () => {
+          enterEditMode();
+        },
+        deselectNode: () => {
+          exitEditMode();
+        },
         update: (updatedNode) => {
           if (updatedNode.type.name !== "mathBlock") return false;
-          if (document.activeElement !== textarea) {
+          currentNode = updatedNode;
+          if (!isEditing) {
             textarea.value = updatedNode.attrs.latex as string;
             renderMath(updatedNode.attrs.latex as string);
           }
