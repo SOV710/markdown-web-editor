@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node, mergeAttributes, InputRule, PasteRule } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
 // Types for tiptap-markdown serialization
@@ -7,6 +7,34 @@ interface MarkdownSerializerState {
   text(text: string, escape?: boolean): void;
   ensureNewLine(): void;
   closeBlock(node: ProseMirrorNode): void;
+}
+
+interface MarkdownItBlockState {
+  src: string;
+  bMarks: number[];
+  eMarks: number[];
+  tShift: number[];
+  line: number;
+  push(type: string, tag: string, nesting: number): {
+    content: string;
+    map: [number, number];
+    attrSet(name: string, value: string): void;
+    attrGet?(name: string): string | null;
+  };
+}
+
+interface MarkdownItInstance {
+  block: {
+    ruler: {
+      before(name: string, ruleName: string, fn: (state: MarkdownItBlockState, startLine: number, endLine: number, silent: boolean) => boolean): void;
+    };
+  };
+  renderer: {
+    rules: Record<string, (tokens: Array<{ content: string; attrGet?(name: string): string | null }>, idx: number) => string>;
+  };
+  utils: {
+    escapeHtml(str: string): string;
+  };
 }
 
 declare module "@tiptap/core" {
@@ -44,6 +72,14 @@ export const VideoBlock = Node.create({
     return [
       {
         tag: 'div[data-type="video-block"]',
+        getAttrs: (element) => {
+          const el = element as HTMLElement;
+          return {
+            src: el.getAttribute("data-src") || el.getAttribute("src") || "",
+            title: el.getAttribute("data-title") || el.getAttribute("title") || "",
+            width: 100,
+          };
+        },
       },
       {
         // Parse raw <video> tags from Markdown HTML
@@ -77,18 +113,67 @@ export const VideoBlock = Node.create({
   addStorage() {
     return {
       markdown: {
-        // Serialize as raw HTML since Markdown has no video syntax
-        // html: true is enabled in Markdown.configure() to support this
+        // Serialize as @[title](url) custom syntax
         serialize(state: MarkdownSerializerState, node: ProseMirrorNode) {
           const src = node.attrs.src as string;
-          const width = node.attrs.width as number;
           const title = node.attrs.title as string;
-          state.write(`<video src="${src}" width="${width}%" title="${title}"></video>`);
+          state.write(`@[${title}](${src})`);
           state.closeBlock(node);
         },
         parse: {
-          // Parsing is handled by parseHTML() since markdown-it with html: true
-          // will pass through <video> tags which TipTap then parses
+          setup(markdownit: MarkdownItInstance) {
+            // Add block rule for @[title](url) syntax
+            markdownit.block.ruler.before("paragraph", "video_block",
+              (state: MarkdownItBlockState, startLine: number, _endLine: number, silent: boolean) => {
+                const bMarkStart = state.bMarks[startLine];
+                const tShiftStart = state.tShift[startLine];
+                const eMarkStart = state.eMarks[startLine];
+
+                if (bMarkStart === undefined || tShiftStart === undefined || eMarkStart === undefined) {
+                  return false;
+                }
+
+                const lineStart = bMarkStart + tShiftStart;
+                const lineEnd = eMarkStart;
+                const lineText = state.src.slice(lineStart, lineEnd).trim();
+
+                // Match @[title](url)
+                const match = lineText.match(/^@\[([^\]]*)\]\(([^)]+)\)$/);
+                if (!match) return false;
+
+                if (silent) return true;
+
+                const title = match[1] ?? "";
+                const src = match[2] ?? "";
+
+                const token = state.push("video_block", "div", 0);
+                token.content = src;
+                token.attrSet("data-type", "video-block");
+                token.attrSet("data-src", src);
+                token.attrSet("data-title", title);
+                token.map = [startLine, startLine + 1];
+
+                state.line = startLine + 1;
+                return true;
+              }
+            );
+
+            markdownit.renderer.rules.video_block = (tokens: Array<{ content: string; attrGet?(name: string): string | null }>, idx: number) => {
+              const token = tokens[idx];
+              if (!token) return "";
+              const src = token.attrGet?.("data-src") ?? token.content ?? "";
+              const title = token.attrGet?.("data-title") ?? "";
+              const escapedSrc = markdownit.utils.escapeHtml(src);
+              const escapedTitle = markdownit.utils.escapeHtml(title);
+              return `<div data-type="video-block" data-src="${escapedSrc}" data-title="${escapedTitle}"></div>\n`;
+            };
+          },
+          updateDOM(element: HTMLElement) {
+            const src = element.getAttribute("data-src");
+            const title = element.getAttribute("data-title");
+            if (src) element.setAttribute("src", src);
+            if (title) element.setAttribute("title", title);
+          },
         },
       },
     };
@@ -106,6 +191,28 @@ export const VideoBlock = Node.create({
       video.src = node.attrs.src as string;
       video.title = node.attrs.title as string;
       video.style.width = "100%";
+
+      // Handle load failure with fallback link display
+      video.onerror = () => {
+        container.innerHTML = "";
+        container.classList.remove("resizable-video");
+        container.classList.add("video-fallback");
+
+        const prefix = document.createElement("span");
+        prefix.textContent = "@";
+        prefix.className = "video-fallback-prefix";
+
+        const linkEl = document.createElement("a");
+        linkEl.href = node.attrs.src as string;
+        linkEl.textContent = (node.attrs.title as string) || (node.attrs.src as string);
+        linkEl.className = "video-fallback-link";
+        linkEl.target = "_blank";
+        linkEl.rel = "noopener noreferrer";
+        linkEl.title = node.attrs.src as string;
+
+        container.appendChild(prefix);
+        container.appendChild(linkEl);
+      };
 
       const leftHandle = document.createElement("div");
       leftHandle.classList.add("resize-handle", "resize-handle-left");
@@ -198,6 +305,38 @@ export const VideoBlock = Node.create({
         },
       };
     };
+  },
+
+  addInputRules() {
+    return [
+      new InputRule({
+        find: /@\[([^\]]*)\]\(([^)]+)\)$/,
+        handler: ({ state, range, match }) => {
+          const title = match[1] ?? "";
+          const src = match[2] ?? "";
+          const { tr } = state;
+          tr.replaceWith(range.from, range.to,
+            this.type.create({ src, title })
+          );
+        },
+      }),
+    ];
+  },
+
+  addPasteRules() {
+    return [
+      new PasteRule({
+        find: /@\[([^\]]*)\]\(([^)]+)\)/g,
+        handler: ({ state, range, match }) => {
+          const title = match[1] ?? "";
+          const src = match[2] ?? "";
+          const { tr } = state;
+          tr.replaceWith(range.from, range.to,
+            this.type.create({ src, title })
+          );
+        },
+      }),
+    ];
   },
 
   addCommands() {

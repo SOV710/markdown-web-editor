@@ -422,3 +422,21 @@
 .tiptap .image-fallback-link:hover {
   text-decoration: underline;
 }
+
+/* ── Video Fallback ── */
+.tiptap .video-fallback {
+  display: inline;
+}
+
+.tiptap .video-fallback-prefix {
+  color: var(--color-text-secondary);
+}
+
+.tiptap .video-fallback-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.tiptap .video-fallback-link:hover {
+  text-decoration: underline;
+}
