@@ -159,21 +159,27 @@ export const MathInline = Node.create({
 
       renderMath();
 
+      // Click to edit: convert back to $latex$ text for editing
       dom.addEventListener("click", () => {
         if (!editor.isEditable) return;
-        const newLatex = window.prompt("Edit LaTeX:", node.attrs.latex as string);
-        if (newLatex !== null) {
-          const pos = editor.view.posAtDOM(dom, 0);
-          editor
-            .chain()
-            .focus()
-            .setNodeSelection(pos)
-            .command(({ tr }) => {
-              tr.setNodeMarkup(pos, undefined, { latex: newLatex });
-              return true;
-            })
-            .run();
-        }
+
+        const latex = node.attrs.latex as string;
+        const pos = editor.view.posAtDOM(dom, 0);
+
+        // Replace the mathInline node with editable $latex$ text
+        // Place cursor after the latex content so user can edit
+        editor
+          .chain()
+          .focus()
+          .setNodeSelection(pos)
+          .command(({ tr }) => {
+            const text = `$${latex}$`;
+            tr.replaceSelectionWith(editor.state.schema.text(text));
+            return true;
+          })
+          // Place cursor inside the $...$ before the closing $
+          .setTextSelection(pos + 1 + latex.length)
+          .run();
       });
 
       return {
