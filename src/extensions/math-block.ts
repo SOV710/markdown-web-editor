@@ -321,12 +321,104 @@ export const MathBlock = Node.create({
         }, 0);
       });
 
-      // Escape key exits edit mode
+      // Keyboard navigation at boundaries
       textarea.addEventListener("keydown", (e) => {
+        const pos = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const len = textarea.value.length;
+        const hasSelection = pos !== end;
+
+        // Backspace at position 0 with no selection: delete the entire node
+        if (e.key === "Backspace" && pos === 0 && !hasSelection) {
+          e.preventDefault();
+          if (typeof getPos !== "function") return;
+          const nodePos = getPos();
+          if (nodePos === undefined) return;
+
+          // Exit edit mode first, then delete the node
+          exitEditMode();
+
+          editor
+            .chain()
+            .focus()
+            .command(({ tr }) => {
+              tr.delete(nodePos, nodePos + currentNode.nodeSize);
+              return true;
+            })
+            .run();
+          return;
+        }
+
+        // Arrow Up at first line: move cursor to block before this node
+        if (e.key === "ArrowUp" && !hasSelection) {
+          const textBeforeCursor = textarea.value.slice(0, pos);
+          const isFirstLine = !textBeforeCursor.includes("\n");
+
+          if (isFirstLine) {
+            e.preventDefault();
+            exitEditMode();
+
+            if (typeof getPos !== "function") return;
+            const nodePos = getPos();
+            if (nodePos === undefined) return;
+
+            editor.chain().focus().setTextSelection(nodePos).run();
+            return;
+          }
+        }
+
+        // Arrow Down at last line: move cursor to block after this node
+        if (e.key === "ArrowDown" && !hasSelection) {
+          const textAfterCursor = textarea.value.slice(pos);
+          const isLastLine = !textAfterCursor.includes("\n");
+
+          if (isLastLine) {
+            e.preventDefault();
+            exitEditMode();
+
+            if (typeof getPos !== "function") return;
+            const nodePos = getPos();
+            if (nodePos === undefined) return;
+
+            const afterPos = nodePos + currentNode.nodeSize;
+            editor.chain().focus().setTextSelection(afterPos).run();
+            return;
+          }
+        }
+
+        // Arrow Left at position 0: move to block before
+        if (e.key === "ArrowLeft" && pos === 0 && !hasSelection) {
+          e.preventDefault();
+          exitEditMode();
+
+          if (typeof getPos !== "function") return;
+          const nodePos = getPos();
+          if (nodePos === undefined) return;
+
+          editor.chain().focus().setTextSelection(nodePos).run();
+          return;
+        }
+
+        // Arrow Right at end: move to block after
+        if (e.key === "ArrowRight" && pos === len && !hasSelection) {
+          e.preventDefault();
+          exitEditMode();
+
+          if (typeof getPos !== "function") return;
+          const nodePos = getPos();
+          if (nodePos === undefined) return;
+
+          const afterPos = nodePos + currentNode.nodeSize;
+          editor.chain().focus().setTextSelection(afterPos).run();
+          return;
+        }
+
+        // Escape: exit edit mode
         if (e.key === "Escape") {
           e.preventDefault();
           exitEditMode();
           editor.commands.focus();
+          return;
         }
       });
 
