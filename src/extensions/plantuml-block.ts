@@ -14,6 +14,9 @@ interface MarkdownItInstance {
   renderer: {
     rules: Record<string, (tokens: Array<{ info: string; content: string }>, idx: number) => string | undefined>;
   };
+  utils: {
+    escapeHtml(str: string): string;
+  };
 }
 
 declare module "@tiptap/core" {
@@ -81,14 +84,11 @@ export const PlantUMLBlock = Node.create({
               if (info === "plantuml") {
                 const source = token.content;
                 // Return HTML that will be parsed as plantumlBlock
-                return `<div data-type="plantuml-block" data-source="${source.replace(/"/g, "&quot;")}"></div>\n`;
+                return `<div data-type="plantuml-block" data-source="${markdownit.utils.escapeHtml(source)}"></div>\n`;
               }
 
               // Fall back to default fence rendering for other languages
-              const escapedContent = token.content
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;");
+              const escapedContent = markdownit.utils.escapeHtml(token.content);
               return `<pre><code class="language-${info}">${escapedContent}</code></pre>\n`;
             };
           },
