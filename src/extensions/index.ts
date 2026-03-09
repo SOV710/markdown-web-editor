@@ -12,3 +12,4 @@ export { VideoBlock } from "./video-block";
 export { SlashCommand } from "./slash-command";
 export { Highlight } from "./highlight";
 export { TyporaMode } from "./typora-mode";
+export { TabHandler } from "./tab-handler";

@@ -21,6 +21,7 @@ import {
   SlashCommand,
   Highlight,
   TyporaMode,
+  TabHandler,
 } from "@/extensions";
 import { slashCommandSuggestion } from "./slash-command-suggestion";
 
@@ -85,6 +86,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       VideoBlock,
       Highlight,
       TyporaMode,
+      TabHandler,
       SlashCommand.configure({
         suggestion: slashCommandSuggestion,
       }),
