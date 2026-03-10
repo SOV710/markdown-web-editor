@@ -8,6 +8,7 @@ import {
   useRef,
 } from "react";
 import type { SlashCommandItem, SlashCommandGroup } from "@/extensions/slash-command";
+import { useLocale } from "@/i18n";
 import styles from "./SlashMenu.module.css";
 
 export interface SlashMenuRef {
@@ -19,20 +20,15 @@ interface SlashMenuProps {
   command: (item: SlashCommandItem) => void;
 }
 
-const GROUP_LABELS: Record<SlashCommandGroup, string> = {
-  text: "Text",
-  list: "Lists",
-  block: "Blocks",
-  media: "Media",
-  advanced: "Advanced",
-};
-
 const GROUP_ORDER: SlashCommandGroup[] = ["text", "list", "block", "media", "advanced"];
 
 export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
+    const { t } = useLocale();
+
+    const groupLabels = t.slashMenu.groups;
 
     // Group items while preserving order
     const groupedItems = useMemo(() => {
@@ -125,7 +121,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
     if (items.length === 0) {
       return (
         <div className={styles.container}>
-          <div className={styles.empty}>No results</div>
+          <div className={styles.empty}>{t.slashMenu.noResults}</div>
         </div>
       );
     }
@@ -138,12 +134,12 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
         {groupedItems.map((group, groupIndex) => (
           <div key={group.group}>
             {groupIndex > 0 && <div className={styles.groupDivider} />}
-            <div className={styles.groupHeader}>{GROUP_LABELS[group.group]}</div>
+            <div className={styles.groupHeader}>{groupLabels[group.group]}</div>
             {group.items.map((item) => {
               const currentIndex = flatIndex++;
               return (
                 <button
-                  key={item.title}
+                  key={item.id}
                   type="button"
                   className={styles.item}
                   data-selected={currentIndex === selectedIndex}

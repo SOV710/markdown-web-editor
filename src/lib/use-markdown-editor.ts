@@ -1,3 +1,4 @@
+import { useRef, useEffect, useMemo } from "react";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -23,28 +24,49 @@ import {
   TyporaMode,
   TabHandler,
 } from "@/extensions";
-import { slashCommandSuggestion } from "./slash-command-suggestion";
+import { createSlashCommandSuggestion } from "./slash-command-suggestion";
+import { dictionaries } from "@/i18n";
+import type { Locale, LocaleRef } from "@/i18n";
 
 export interface UseMarkdownEditorOptions {
-  /** 初始内容 (Markdown string) */
+  /** Initial content (Markdown string) */
   content?: string;
-  /** placeholder 提示文字 */
+  /** Placeholder hint text */
   placeholder?: string;
-  /** 内容变更回调 */
+  /** Content change callback */
   onUpdate?: (markdown: string) => void;
+  /** Current locale */
+  locale?: Locale;
 }
-
-const DEFAULT_CONTENT = `## Welcome to the Editor
-
-Start typing, or press \`/\` for commands…
-`;
 
 export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
   const {
-    content = DEFAULT_CONTENT,
-    placeholder = "Type '/' for commands…",
+    content,
+    placeholder,
     onUpdate,
+    locale = "en",
   } = options;
+
+  const localeRef = useRef<LocaleRef["current"]>(dictionaries[locale]);
+
+  // Keep localeRef in sync with current locale
+  useEffect(() => {
+    localeRef.current = dictionaries[locale];
+  }, [locale]);
+
+  const localeRefObj = useMemo<LocaleRef>(() => ({ get current() { return localeRef.current; }, set current(v) { localeRef.current = v; } }), []);
+
+  const slashSuggestion = useMemo(
+    () => createSlashCommandSuggestion(localeRefObj),
+    [localeRefObj]
+  );
+
+  // Compute initial content and placeholder once (don't react to locale changes for these)
+  const initialContent = useMemo(
+    () => content ?? dictionaries[locale].editor.defaultContent,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const editor = useEditor({
     extensions: [
@@ -57,9 +79,10 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
         showOnlyCurrent: true,
         placeholder: ({ node }) => {
           if (node.type.name === "heading") {
-            return `Heading ${node.attrs.level as number}`;
+            const t = localeRef.current;
+            return `${t.placeholder.heading} ${node.attrs.level as number}`;
           }
-          return placeholder;
+          return placeholder ?? localeRef.current.placeholder.default;
         },
       }),
       // tiptap-markdown: enables Markdown serialization/parsing directly on ProseMirror doc
@@ -81,17 +104,23 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
       TableCell,
       CodeBlockLowlight,
       MathInline,
-      MathBlock,
-      PlantUMLBlock,
+      MathBlock.configure({
+        localeRef: localeRefObj,
+      }),
+      PlantUMLBlock.configure({
+        localeRef: localeRefObj,
+      }),
       VideoBlock,
       Highlight,
       TyporaMode,
-      TabHandler,
+      TabHandler.configure({
+        localeRef: localeRefObj,
+      }),
       SlashCommand.configure({
-        suggestion: slashCommandSuggestion,
+        suggestion: slashSuggestion,
       }),
     ],
-    content,
+    content: initialContent,
     onUpdate: ({ editor: e }) => {
       // tiptap-markdown adds `markdown` to storage at runtime
       const storage = e.storage as unknown as { markdown: MarkdownStorage };

@@ -1,4 +1,5 @@
 import { TextAlignLeft, BracketsAngle } from "@phosphor-icons/react";
+import { useLocale } from "@/i18n";
 import styles from "./ViewToggle.module.css";
 
 export type ViewMode = "richtext" | "source";
@@ -9,6 +10,8 @@ interface ViewToggleProps {
 }
 
 export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
+  const { t } = useLocale();
+
   return (
     <div className={styles.container}>
       <button
@@ -16,7 +19,7 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
         data-active={mode === "richtext"}
         onClick={() => onModeChange("richtext")}
         type="button"
-        title="Rich Text View"
+        title={t.viewToggle.richText}
       >
         <TextAlignLeft size={16} />
       </button>
@@ -25,7 +28,7 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
         data-active={mode === "source"}
         onClick={() => onModeChange("source")}
         type="button"
-        title="Markdown Source"
+        title={t.viewToggle.markdownSource}
       >
         <BracketsAngle size={16} />
       </button>

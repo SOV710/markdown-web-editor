@@ -1,6 +1,7 @@
 import { Node, mergeAttributes, InputRule } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { encode } from "plantuml-encoder";
+import type { LocaleRef } from "@/i18n";
 
 // Types for tiptap-markdown serialization
 interface MarkdownSerializerState {
@@ -29,10 +30,20 @@ declare module "@tiptap/core" {
 
 const PLANTUML_SERVER = "https://www.plantuml.com/plantuml/svg";
 
-export const PlantUMLBlock = Node.create({
+interface PlantUMLBlockOptions {
+  localeRef: LocaleRef | null;
+}
+
+export const PlantUMLBlock = Node.create<PlantUMLBlockOptions>({
   name: "plantumlBlock",
   group: "block",
   atom: true,
+
+  addOptions() {
+    return {
+      localeRef: null,
+    };
+  },
 
   addAttributes() {
     return {
@@ -106,6 +117,7 @@ export const PlantUMLBlock = Node.create({
 
   addNodeView() {
     return ({ node, editor, getPos }) => {
+      const localeRef = this.options.localeRef;
       const dom = document.createElement("div");
       dom.classList.add("plantuml-block");
       dom.setAttribute("data-type", "plantuml-block");
@@ -127,7 +139,7 @@ export const PlantUMLBlock = Node.create({
 
       const loadingDiv = document.createElement("div");
       loadingDiv.classList.add("plantuml-block-loading");
-      loadingDiv.textContent = "Rendering...";
+      loadingDiv.textContent = localeRef?.current.plantumlBlock.rendering ?? "Rendering...";
       loadingDiv.style.display = "none";
       preview.appendChild(loadingDiv);
 
@@ -153,7 +165,7 @@ export const PlantUMLBlock = Node.create({
           if (!placeholder) {
             const p = document.createElement("span");
             p.classList.add("plantuml-placeholder");
-            p.textContent = "Click to add diagram";
+            p.textContent = localeRef?.current.plantumlBlock.clickToAdd ?? "Click to add diagram";
             preview.appendChild(p);
           }
           return;
@@ -184,13 +196,13 @@ export const PlantUMLBlock = Node.create({
           img.onerror = () => {
             loadingDiv.style.display = "none";
             img.style.display = "none";
-            errorDiv.textContent = "Failed to render diagram";
+            errorDiv.textContent = localeRef?.current.plantumlBlock.failedToRender ?? "Failed to render diagram";
             errorDiv.style.display = "block";
           };
         } catch {
           loadingDiv.style.display = "none";
           img.style.display = "none";
-          errorDiv.textContent = "Invalid PlantUML syntax";
+          errorDiv.textContent = localeRef?.current.plantumlBlock.invalidSyntax ?? "Invalid PlantUML syntax";
           errorDiv.style.display = "block";
         }
       };

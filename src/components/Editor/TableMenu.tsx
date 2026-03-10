@@ -7,6 +7,7 @@ import {
   ColumnsPlusRight,
   Trash,
 } from "@phosphor-icons/react";
+import { useLocale } from "@/i18n";
 import styles from "./Editor.module.css";
 
 const TABLE_ICON_SIZE = 14;
@@ -16,6 +17,8 @@ interface TableMenuProps {
 }
 
 export function TableMenu({ editor }: TableMenuProps) {
+  const { t } = useLocale();
+
   return (
     <BubbleMenu
       editor={editor}
@@ -26,59 +29,59 @@ export function TableMenu({ editor }: TableMenuProps) {
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().addRowBefore().run()}
-        title="Add row before"
+        title={t.tableMenu.addRowBefore}
       >
-        <RowsPlusTop size={TABLE_ICON_SIZE} /> Row
+        <RowsPlusTop size={TABLE_ICON_SIZE} /> {t.tableMenu.row}
       </button>
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().addRowAfter().run()}
-        title="Add row after"
+        title={t.tableMenu.addRowAfter}
       >
-        <RowsPlusBottom size={TABLE_ICON_SIZE} /> Row
+        <RowsPlusBottom size={TABLE_ICON_SIZE} /> {t.tableMenu.row}
       </button>
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().deleteRow().run()}
-        title="Delete row"
+        title={t.tableMenu.deleteRow}
       >
-        <Trash size={TABLE_ICON_SIZE} /> Row
+        <Trash size={TABLE_ICON_SIZE} /> {t.tableMenu.row}
       </button>
       <span className={styles.tableMenuDivider} />
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().addColumnBefore().run()}
-        title="Add column before"
+        title={t.tableMenu.addColBefore}
       >
-        <ColumnsPlusLeft size={TABLE_ICON_SIZE} /> Col
+        <ColumnsPlusLeft size={TABLE_ICON_SIZE} /> {t.tableMenu.col}
       </button>
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().addColumnAfter().run()}
-        title="Add column after"
+        title={t.tableMenu.addColAfter}
       >
-        <ColumnsPlusRight size={TABLE_ICON_SIZE} /> Col
+        <ColumnsPlusRight size={TABLE_ICON_SIZE} /> {t.tableMenu.col}
       </button>
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().deleteColumn().run()}
-        title="Delete column"
+        title={t.tableMenu.deleteCol}
       >
-        <Trash size={TABLE_ICON_SIZE} /> Col
+        <Trash size={TABLE_ICON_SIZE} /> {t.tableMenu.col}
       </button>
       <span className={styles.tableMenuDivider} />
       <button
         type="button"
         className={styles.tableMenuBtn}
         onClick={() => editor.chain().focus().deleteTable().run()}
-        title="Delete table"
+        title={t.tableMenu.deleteTable}
       >
-        <Trash size={TABLE_ICON_SIZE} /> Table
+        <Trash size={TABLE_ICON_SIZE} /> {t.tableMenu.table}
       </button>
     </BubbleMenu>
   );

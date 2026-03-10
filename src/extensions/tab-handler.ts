@@ -1,14 +1,26 @@
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import type { EditorView } from "@tiptap/pm/view";
+import type { LocaleRef } from "@/i18n";
 
 const tabHandlerKey = new PluginKey("tabHandler");
 
-export const TabHandler = Extension.create({
+interface TabHandlerOptions {
+  localeRef: LocaleRef | null;
+}
+
+export const TabHandler = Extension.create<TabHandlerOptions>({
   name: "tabHandler",
+
+  addOptions() {
+    return {
+      localeRef: null,
+    };
+  },
 
   addProseMirrorPlugins() {
     const editor = this.editor;
+    const localeRef = this.options.localeRef;
 
     return [
       new Plugin({
@@ -90,7 +102,7 @@ export const TabHandler = Extension.create({
                   const sunkTask = editor.chain().sinkListItem("taskItem").run();
                   if (!sunkTask) {
                     // Cannot indent further — show a brief visual hint
-                    showIndentLimitHint(view);
+                    showIndentLimitHint(view, localeRef?.current.tabHandler.cannotIndent ?? "Cannot indent further");
                   }
                 }
               }
@@ -128,12 +140,12 @@ export const TabHandler = Extension.create({
  * Show a brief visual hint that the list item cannot be indented further.
  * Renders a small tooltip near the cursor that fades out after 1.5s.
  */
-function showIndentLimitHint(view: EditorView): void {
+function showIndentLimitHint(view: EditorView, message: string): void {
   const { from } = view.state.selection;
   const coords = view.coordsAtPos(from);
 
   const hint = document.createElement("div");
-  hint.textContent = "Cannot indent further";
+  hint.textContent = message;
   hint.style.cssText = `
     position: fixed;
     left: ${coords.left}px;

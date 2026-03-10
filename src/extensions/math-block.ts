@@ -1,6 +1,7 @@
 import { Node, mergeAttributes, InputRule } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import katex from "katex";
+import type { LocaleRef } from "@/i18n";
 
 // Types for tiptap-markdown serialization
 interface MarkdownSerializerState {
@@ -48,10 +49,20 @@ declare module "@tiptap/core" {
   }
 }
 
-export const MathBlock = Node.create({
+interface MathBlockOptions {
+  localeRef: LocaleRef | null;
+}
+
+export const MathBlock = Node.create<MathBlockOptions>({
   name: "mathBlock",
   group: "block",
   atom: true,
+
+  addOptions() {
+    return {
+      localeRef: null,
+    };
+  },
 
   addAttributes() {
     return {
@@ -201,6 +212,7 @@ export const MathBlock = Node.create({
 
   addNodeView() {
     return ({ node, editor, getPos }) => {
+      const localeRef = this.options.localeRef;
       const dom = document.createElement("div");
       dom.classList.add("math-block");
       dom.setAttribute("data-type", "math-block");
@@ -209,7 +221,7 @@ export const MathBlock = Node.create({
       const textarea = document.createElement("textarea");
       textarea.classList.add("math-block-input");
       textarea.value = node.attrs.latex as string;
-      textarea.placeholder = "Enter LaTeX...";
+      textarea.placeholder = localeRef?.current.mathBlock.enterLatex ?? "Enter LaTeX...";
       textarea.rows = 3;
 
       // Create preview container (visible by default in collapsed state)
@@ -222,7 +234,7 @@ export const MathBlock = Node.create({
 
       const renderMath = (latex: string) => {
         if (!latex.trim()) {
-          preview.innerHTML = '<span class="math-placeholder">Click to add formula</span>';
+          preview.innerHTML = `<span class="math-placeholder">${localeRef?.current.mathBlock.clickToAdd ?? "Click to add formula"}</span>`;
           preview.classList.remove("math-error");
           return;
         }
@@ -233,7 +245,7 @@ export const MathBlock = Node.create({
           });
           preview.classList.remove("math-error");
         } catch {
-          preview.innerHTML = `<span class="math-error">Invalid LaTeX: ${latex}</span>`;
+          preview.innerHTML = `<span class="math-error">${localeRef?.current.mathBlock.invalidLatex ?? "Invalid LaTeX:"} ${latex}</span>`;
           preview.classList.add("math-error");
         }
       };

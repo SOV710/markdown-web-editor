@@ -5,10 +5,13 @@ import { DotsSixVertical } from "@phosphor-icons/react";
 import type { MarkdownStorage } from "tiptap-markdown";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
+import { LocaleProvider, useLocale } from "@/i18n";
+import type { Locale } from "@/i18n";
 import { TableMenu } from "./TableMenu";
 import { ContextMenu } from "./ContextMenu";
 import { SourceEditor } from "./SourceEditor";
 import { ViewToggle, type ViewMode } from "./ViewToggle";
+import { LanguageToggle } from "./LanguageToggle";
 import styles from "./Editor.module.css";
 import "@/styles/editor.css";
 import "@/styles/hljs.css";
@@ -16,10 +19,13 @@ import "@/styles/katex.css";
 
 export interface EditorProps extends UseMarkdownEditorOptions {
   className?: string;
+  locale?: Locale;
+  onLocaleChange?: (locale: Locale) => void;
 }
 
-export function Editor({ className, ...editorOptions }: EditorProps) {
-  const editor = useMarkdownEditor(editorOptions);
+function EditorInner({ className, locale: _locale, onLocaleChange: _onLocaleChange, ...editorOptions }: EditorProps) {
+  const { locale, t } = useLocale();
+  const editor = useMarkdownEditor({ ...editorOptions, locale });
   const [viewMode, setViewMode] = useState<ViewMode>("richtext");
   const [markdownSource, setMarkdownSource] = useState("");
 
@@ -65,6 +71,7 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
   return (
     <div className={`${styles.wrapper} ${className ?? ""}`}>
       <div className={styles.toolbarRow}>
+        <LanguageToggle />
         <ViewToggle mode={viewMode} onModeChange={handleModeChange} />
       </div>
 
@@ -73,7 +80,7 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
           <EditorContent editor={editor} />
           {editor && <TableMenu editor={editor} />}
           {editor && (
-            <DragHandle editor={editor} className={styles.dragHandle}>
+            <DragHandle editor={editor} className={styles.dragHandle} data-tooltip={t.dragHandle.dragToMove}>
               <DotsSixVertical size={16} weight="bold" />
             </DragHandle>
           )}
@@ -89,5 +96,13 @@ export function Editor({ className, ...editorOptions }: EditorProps) {
       {/* Render outside .editorArea to avoid React/ProseMirror DOM conflicts */}
       {editor && viewMode === "richtext" && <ContextMenu editor={editor} />}
     </div>
+  );
+}
+
+export function Editor({ locale, onLocaleChange, ...rest }: EditorProps) {
+  return (
+    <LocaleProvider locale={locale} onLocaleChange={onLocaleChange}>
+      <EditorInner {...rest} />
+    </LocaleProvider>
   );
 }
