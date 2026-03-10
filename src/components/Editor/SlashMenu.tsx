@@ -104,7 +104,7 @@ export const SlashMenu = forwardRef<SlashMenuRef, SlashMenuProps>(
           return true;
         }
 
-        if (event.key === "Enter") {
+        if (event.key === "Enter" || event.key === "Tab") {
           enterHandler();
           return true;
         }

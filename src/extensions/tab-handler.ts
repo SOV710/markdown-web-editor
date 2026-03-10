@@ -17,6 +17,13 @@ export const TabHandler = Extension.create({
           handleKeyDown(view, event) {
             if (event.key !== "Tab") return false;
 
+            // If the slash command popup is open, let the suggestion plugin handle Tab.
+            const slashPopup = document.querySelector(".tippy-box");
+            if (slashPopup) {
+              event.preventDefault();
+              return false;
+            }
+
             event.preventDefault(); // ALWAYS prevent browser Tab behavior
 
             const { state } = view;
