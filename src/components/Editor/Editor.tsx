@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { EditorContent } from "@tiptap/react";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
 import { DotsSixVertical } from "@phosphor-icons/react";
@@ -6,12 +6,13 @@ import type { MarkdownStorage } from "tiptap-markdown";
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 import type { UseMarkdownEditorOptions } from "@/lib/use-markdown-editor";
 import { LocaleProvider, useLocale } from "@/i18n";
-import type { Locale } from "@/i18n";
+import type { Locale, LocaleRef } from "@/i18n";
 import { TableMenu } from "./TableMenu";
 import { ContextMenu } from "./ContextMenu";
 import { SourceEditor } from "./SourceEditor";
 import { ViewToggle, type ViewMode } from "./ViewToggle";
 import { LanguageToggle } from "./LanguageToggle";
+import { ExportButton } from "./ExportButton";
 import styles from "./Editor.module.css";
 import "@/styles/editor.css";
 import "@/styles/hljs.css";
@@ -28,6 +29,20 @@ function EditorInner({ className, locale: _locale, onLocaleChange: _onLocaleChan
   const editor = useMarkdownEditor({ ...editorOptions, locale });
   const [viewMode, setViewMode] = useState<ViewMode>("richtext");
   const [markdownSource, setMarkdownSource] = useState("");
+
+  // Create a locale ref for PDF export (always points to current dictionary)
+  const localeRef = useMemo<LocaleRef>(() => ({ current: t }), []);
+  // Keep it in sync
+  localeRef.current = t;
+
+  // Markdown getter for export (null when editor is unavailable)
+  const getMarkdown = useMemo(() => {
+    if (!editor) return null;
+    return () => {
+      const storage = editor.storage as unknown as { markdown: MarkdownStorage };
+      return storage.markdown.getMarkdown();
+    };
+  }, [editor]);
 
   // Sync markdown source when switching views
   // NOTE: CommonMark collapses multiple consecutive blank lines into one.
@@ -72,6 +87,11 @@ function EditorInner({ className, locale: _locale, onLocaleChange: _onLocaleChan
     <div className={`${styles.wrapper} ${className ?? ""}`}>
       <div className={styles.toolbarRow}>
         <LanguageToggle />
+        <ExportButton
+          getMarkdown={getMarkdown}
+          localeRef={localeRef}
+          disabled={viewMode === "source"}
+        />
         <ViewToggle mode={viewMode} onModeChange={handleModeChange} />
       </div>
 

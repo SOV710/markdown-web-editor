@@ -107,6 +107,12 @@ export interface Dictionary {
   langToggle: {
     label: string;
   };
+  exportButton: {
+    title: string;
+    exporting: string;
+    videoLabel: string;
+    scanToWatch: string;
+  };
 }
 
 export interface LocaleRef {

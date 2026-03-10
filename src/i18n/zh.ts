@@ -110,4 +110,10 @@ export const zh: Dictionary = {
   langToggle: {
     label: "\u4E2D",
   },
+  exportButton: {
+    title: "\u5BFC\u51FA PDF",
+    exporting: "\u5BFC\u51FA\u4E2D...",
+    videoLabel: "\u89C6\u9891",
+    scanToWatch: "\u626B\u7801\u89C2\u770B",
+  },
 };

@@ -110,4 +110,10 @@ Start typing, or press \`/\` for commands\u2026
   langToggle: {
     label: "EN",
   },
+  exportButton: {
+    title: "Export PDF",
+    exporting: "Exporting...",
+    videoLabel: "Video",
+    scanToWatch: "Scan to watch",
+  },
 };
