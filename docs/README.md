@@ -30,46 +30,53 @@ Rich text editor built with TipTap 3.20.1 + React 19 + TypeScript 5.9.
 
 ```
 src/
-├── components/Editor/   # React components
-│   ├── Editor.tsx           # Main editor container
-│   ├── ContextMenu/         # Right-click context menu
-│   ├── TableMenu.tsx        # Table operations menu
-│   ├── SlashMenu.tsx        # Slash command menu
-│   ├── SourceEditor.tsx     # CodeMirror source editor
-│   ├── ViewToggle.tsx       # View mode toggle
-│   └── ResizeHandle.tsx     # Resize handle component
-├── extensions/          # TipTap extensions
-│   ├── slash-command.tsx    # Slash command extension
-│   ├── math-inline.ts       # Inline math formula
-│   ├── math-block.ts        # Block math formula
-│   ├── plantuml-block.ts    # PlantUML diagrams
-│   ├── image.ts             # Resizable images
-│   ├── video-block.ts       # Resizable video
-│   ├── code-block.ts        # Syntax-highlighted code
-│   ├── link.ts              # Links
-│   ├── underline.ts         # Underline mark
-│   ├── highlight.ts         # Highlight mark (==...==)
-│   ├── table.ts             # Tables
-│   ├── task-list.ts         # Task lists
-│   ├── custom-keymap.ts     # Custom keyboard shortcuts
-│   ├── typora-mode.ts       # Typora-style heading markers
-│   ├── tab-handler.ts       # Tab/Shift+Tab key handling
-│   ├── math-utils.ts        # Shared math rendering utilities
-│   └── index.ts             # Barrel export
-├── lib/                 # Utility functions
+├── i18n/                    # Internationalization
+│   ├── types.ts                 # Locale, Dictionary, LocaleRef types
+│   ├── en.ts                    # English dictionary
+│   ├── zh.ts                    # Chinese dictionary
+│   ├── context.tsx              # LocaleProvider + useLocale() hook
+│   └── index.ts                 # Barrel export
+├── components/Editor/       # React components
+│   ├── Editor.tsx               # Main editor container
+│   ├── ContextMenu/             # Right-click context menu
+│   ├── TableMenu.tsx            # Table operations menu
+│   ├── SlashMenu.tsx            # Slash command menu
+│   ├── SourceEditor.tsx         # CodeMirror source editor
+│   ├── ViewToggle.tsx           # View mode toggle
+│   ├── LanguageToggle.tsx       # EN/中 language toggle button
+│   └── ResizeHandle.tsx         # Resize handle component
+├── extensions/              # TipTap extensions
+│   ├── slash-command.tsx        # Slash command extension + items
+│   ├── math-inline.ts          # Inline math formula
+│   ├── math-block.ts           # Block math formula
+│   ├── plantuml-block.ts       # PlantUML diagrams
+│   ├── image.ts                # Resizable images
+│   ├── video-block.ts          # Resizable video
+│   ├── code-block.ts           # Syntax-highlighted code
+│   ├── link.ts                 # Links
+│   ├── underline.ts            # Underline mark
+│   ├── highlight.ts            # Highlight mark (==...==)
+│   ├── table.ts                # Tables
+│   ├── task-list.ts            # Task lists
+│   ├── custom-keymap.ts        # Custom keyboard shortcuts
+│   ├── typora-mode.ts          # Typora-style heading markers
+│   ├── tab-handler.ts          # Tab/Shift+Tab key handling
+│   ├── math-utils.ts           # Shared math input rule regex
+│   └── index.ts                # Barrel export
+├── lib/                     # Utility functions
 │   ├── use-markdown-editor.ts       # Editor initialization hook
-│   ├── slash-command-suggestion.tsx # Slash command Suggestion config
-│   ├── link-utils.ts                # Link/image insertion helpers
+│   ├── slash-command-suggestion.tsx  # Slash command Suggestion config
+│   ├── link-utils.ts                # Link/image/video insertion helpers
 │   └── word-segmentation.ts         # CJK word boundary detection
-├── styles/              # Global styles
-│   ├── reset.css            # CSS variables and reset
-│   ├── editor.css           # Editor content styles
-│   ├── hljs.css             # Code highlighting
-│   └── katex.css            # Math formula styles
-└── types/               # Type definitions
-    ├── editor.ts            # Editor-related types
-    ├── strapi.ts            # Strapi CMS types
-    └── plantuml-encoder.d.ts # plantuml-encoder type declarations
+├── styles/                  # Global styles
+│   ├── reset.css                # CSS variables and reset
+│   ├── editor.css               # Editor content styles
+│   ├── hljs.css                 # Code highlighting
+│   └── katex.css                # Math formula styles
+└── types/                   # Type definitions
+    ├── editor.ts                # Editor-related types
+    ├── strapi.ts                # Strapi CMS types
+    └── plantuml-encoder.d.ts    # plantuml-encoder type declarations
 ```
 
 ## Quick Start
@@ -90,10 +97,11 @@ pnpm lint     # ESLint check
 | Tables | Insert, edit, row/column operations |
 | Code blocks | Syntax highlighting via lowlight |
 | Math formulas | Inline `$...$`, block `$$...$$` (KaTeX) |
-| PlantUML | UML diagram rendering (500ms debounce) |
+| PlantUML | UML diagram rendering via plantuml.com |
 | Media | Resizable images and videos (10-100% width) |
 | Links | Plain Markdown syntax insertion |
-| Slash commands | `/` triggered quick insertion with grouping and search |
+| Slash commands | `/` triggered quick insertion with grouping and fuzzy search |
 | Dual view | Rich text / Markdown source toggle (Ctrl+M) |
 | Heading markers | Typora-style heading syntax shown when cursor is inside headings |
 | Context menu | Right-click for formatting, insertion, and clipboard operations |
+| i18n | English and Chinese with runtime toggle; slash menu fuzzy-searches both languages |

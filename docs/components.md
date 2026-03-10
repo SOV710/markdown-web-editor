@@ -10,6 +10,7 @@ All components are in `src/components/Editor/`.
 - [SlashMenu](#slashmenu)
 - [SourceEditor](#sourceeditor)
 - [ViewToggle](#viewtoggle)
+- [LanguageToggle](#languagetoggle)
 - [ResizeHandle](#resizehandle)
 
 ---
@@ -18,12 +19,14 @@ All components are in `src/components/Editor/`.
 
 **File**: `Editor.tsx`
 
-**Purpose**: Main editor container, manages view mode toggle
+**Purpose**: Main editor container, manages view mode toggle, wraps content with `LocaleProvider`
 
 **Props**:
 ```ts
 interface EditorProps extends UseMarkdownEditorOptions {
   className?: string;
+  locale?: Locale;
+  onLocaleChange?: (locale: Locale) => void;
 }
 
 // UseMarkdownEditorOptions:
@@ -31,8 +34,11 @@ interface UseMarkdownEditorOptions {
   content?: string;       // Initial Markdown content
   placeholder?: string;   // Placeholder text
   onUpdate?: (markdown: string) => void;  // Content update callback
+  locale?: Locale;        // Current locale ("en" | "zh")
 }
 ```
+
+**Locale control**: If `locale` is provided, the Editor operates in controlled mode. If omitted, locale state is managed internally by `LocaleProvider` with a toggle button.
 
 **State**:
 | State | Type | Description |
@@ -44,21 +50,24 @@ interface UseMarkdownEditorOptions {
 
 **Structure**:
 ```
-Editor
-├── toolbarRow
-│   └── ViewToggle
-└── editorArea
-    ├── EditorContent (richtext mode)
-    │   ├── TableMenu
-    │   └── DragHandle
-    └── SourceEditor (source mode)
-└── ContextMenu (rendered via portal)
+Editor (wraps with LocaleProvider)
+└── EditorInner
+    ├── toolbarRow
+    │   ├── LanguageToggle
+    │   └── ViewToggle
+    └── editorArea
+        ├── EditorContent (richtext mode)
+        │   ├── TableMenu
+        │   └── DragHandle (data-tooltip from t.dragHandle.dragToMove)
+        └── SourceEditor (source mode)
+    └── ContextMenu (rendered via portal)
 ```
 
 **Dependencies**:
 - `@tiptap/react` - EditorContent
 - `@tiptap/extension-drag-handle-react` - DragHandle
 - `@phosphor-icons/react` - DotsSixVertical icon
+- `@/i18n` - LocaleProvider, useLocale
 
 ---
 
@@ -77,15 +86,17 @@ interface ContextMenuProps {
 
 **Rendering**: Uses `createPortal` to render to `document.body`, avoiding React/ProseMirror DOM conflicts
 
+**i18n**: All menu labels read from `t.contextMenu.*` via `useLocale()`. Keyboard shortcuts remain hardcoded (not language-dependent).
+
 **Menu Structure** (nested submenus):
 
 | Item | Type | Description |
 |------|------|-------------|
 | Add Link | action | Insert `[]()` link syntax (Ctrl+K) |
 | Search for "..." | action | Google search for selected text (only with selection) |
-| Format ▸ | submenu | Bold, Italic, Strikethrough, Highlight, Code, Math, Clear formatting |
-| Paragraph ▸ | submenu | Lists, Heading 1-6, Body, Quote |
-| Insert ▸ | submenu | Image, Video, Table, HR, Code block, Math block, PlantUML |
+| Format | submenu | Bold, Italic, Strikethrough, Highlight, Code, Math, Clear formatting |
+| Paragraph | submenu | Lists, Heading 1-6, Body, Quote |
+| Insert | submenu | Image, Video, Table, HR, Code block, Math block, PlantUML |
 | Cut | action | Cut to clipboard (disabled without selection) |
 | Copy | action | Copy to clipboard (disabled without selection) |
 | Paste | action | Paste from clipboard |
@@ -96,7 +107,7 @@ interface ContextMenuProps {
 - Bold (Ctrl+B), Italic (Ctrl+I), Strikethrough (Ctrl+Shift+S), Highlight (Ctrl+Shift+H)
 - Code (Ctrl+E), Math
 - Clear formatting
-- Shows checkmark (✓) for active formats
+- Shows checkmark for active formats
 
 **Paragraph Submenu**:
 - Bullet list, Numbered list, Task list
@@ -112,7 +123,6 @@ interface ContextMenuProps {
 **Features**:
 - Submenus open on hover with 150ms delay
 - Auto-flip positioning when near viewport edges (horizontal and vertical)
-- Uses DOM traversal in `useLayoutEffect` for submenu positioning
 - Keyboard navigation: Arrow keys, Enter, Escape
 
 **State**:
@@ -129,7 +139,7 @@ interface ContextMenuProps {
 
 **File**: `TableMenu.tsx`
 
-**Purpose**: Table operations context menu
+**Purpose**: Table operations floating menu (BubbleMenu)
 
 **Props**:
 ```ts
@@ -139,6 +149,8 @@ interface TableMenuProps {
 ```
 
 **Visibility**: Shows when cursor is in table (`editor.isActive("table")`)
+
+**i18n**: Button titles and visible labels read from `t.tableMenu.*` via `useLocale()`.
 
 **Operations**:
 | Button | Icon | Action |
@@ -178,20 +190,15 @@ interface SlashMenuRef {
 }
 ```
 
-**Group Display**:
-| Group | Label |
-|-------|-------|
-| text | Text |
-| list | Lists |
-| block | Blocks |
-| media | Media |
-| advanced | Advanced |
+**i18n**: Group labels read from `t.slashMenu.groups` and "No results" text from `t.slashMenu.noResults` via `useLocale()`.
 
 **Keyboard Navigation**:
 | Key | Action |
 |-----|--------|
 | ArrowUp | Previous item |
 | ArrowDown | Next item |
+| Tab | Next item |
+| Shift+Tab | Previous item |
 | Enter | Execute command |
 | Escape | Close menu |
 
@@ -252,13 +259,27 @@ interface ViewToggleProps {
 export type ViewMode = "richtext" | "source";
 ```
 
+**i18n**: Title attributes read from `t.viewToggle.*` via `useLocale()`.
+
 **Buttons**:
-| Icon | Mode | Title |
+| Icon | Mode | Title (en) |
 |------|------|-------|
 | TextAlignLeft | richtext | Rich Text View |
 | BracketsAngle | source | Markdown Source |
 
 **Icon Size**: 16px
+
+---
+
+## LanguageToggle
+
+**File**: `LanguageToggle.tsx`
+
+**Purpose**: Button to toggle between English and Chinese locale
+
+**i18n**: Uses `useLocale()` to read current locale and call `setLocale()`. Displays `t.langToggle.label` ("EN" or "中").
+
+**Style**: Small button placed next to ViewToggle in the toolbar row.
 
 ---
 

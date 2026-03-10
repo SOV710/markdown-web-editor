@@ -6,16 +6,19 @@
 ┌─────────────────────────────────────────┐
 │              App.tsx                    │  Entry point
 ├─────────────────────────────────────────┤
-│           Components Layer              │  UI components
-│  (Editor, ContextMenu, TableMenu, ...)  │
+│            i18n Layer                  │  Locale context
+│  (LocaleProvider, useLocale, dicts)    │
 ├─────────────────────────────────────────┤
-│             Library Layer               │  Utilities
-│  (useMarkdownEditor, linkUtils, ...)    │
+│           Components Layer             │  UI components
+│  (Editor, ContextMenu, TableMenu, ...) │
 ├─────────────────────────────────────────┤
-│           Extensions Layer              │  TipTap extensions
-│  (Image, Table, MathBlock, ...)         │
+│             Library Layer              │  Utilities
+│  (useMarkdownEditor, linkUtils, ...)   │
 ├─────────────────────────────────────────┤
-│         TipTap / ProseMirror            │  Editor core
+│           Extensions Layer             │  TipTap extensions
+│  (Image, Table, MathBlock, ...)        │
+├─────────────────────────────────────────┤
+│         TipTap / ProseMirror           │  Editor core
 └─────────────────────────────────────────┘
 ```
 
@@ -57,6 +60,7 @@ editor.commands ←──────────────  User edits
 
 | Directory | Purpose |
 |-----------|---------|
+| `src/i18n/` | Locale types, en/zh dictionaries, LocaleProvider + useLocale() |
 | `src/extensions/` | TipTap Node and Extension definitions |
 | `src/components/Editor/` | React UI components |
 | `src/lib/` | Editor initialization hook, utilities |
@@ -71,7 +75,7 @@ TipTap extensions fall into three categories:
 |------|-------------|----------|
 | Node | Block or inline content | Image, Table, MathBlock, VideoBlock |
 | Mark | Text decoration | Underline, Link, Highlight |
-| Extension | Feature enhancement | SlashCommand, CustomKeymap, TyporaMode |
+| Extension | Feature enhancement | SlashCommand, CustomKeymap, TyporaMode, TabHandler |
 
 ## Key Design Decisions
 
@@ -97,9 +101,11 @@ Image and VideoBlock use custom NodeView:
 Based on TipTap Suggestion API:
 - Listens for `/` character trigger
 - Tippy.js positions popup menu (placement: bottom-start)
-- Keyboard navigation (ArrowUp/Down, Enter, Escape)
+- Keyboard navigation (ArrowUp/Down, Tab/Shift+Tab, Enter, Escape)
 - Command groups: text, list, block, media, advanced
-- Fuzzy search filtering
+- Items generated from `getSlashCommandItems(t: Dictionary)` with localized titles/descriptions
+- Each item has `searchTerms` containing both English and Chinese terms
+- Fuzzy subsequence matching on both `title` and `searchTerms`
 
 ### 4. Dual View Synchronization
 
@@ -126,14 +132,42 @@ TyporaMode extension uses ProseMirror decorations:
 
 ### 7. Placeholder System
 
-Uses TipTap Placeholder extension with per-node-type function:
+Uses TipTap Placeholder extension with per-node-type function reading from `localeRef`:
 ```typescript
 Placeholder.configure({
   placeholder: ({ node }) => {
     if (node.type.name === "heading") {
-      return `Heading ${node.attrs.level}`;
+      const t = localeRef.current;
+      return `${t.placeholder.heading} ${node.attrs.level}`;
     }
-    return "Type '/' for commands…";
+    return placeholder ?? localeRef.current.placeholder.default;
   },
 })
 ```
+
+### 8. i18n Architecture
+
+No i18n framework. Simple dictionary + React Context + mutable ref:
+
+- **Two locale dictionaries** (`en.ts`, `zh.ts`) as plain `Dictionary` objects
+- **React components** use `useLocale()` hook returning `{ locale, setLocale, t }`
+- **TipTap extensions** (non-React) receive a `localeRef: LocaleRef` object via `.configure()`. React syncs it via `useEffect` in `useMarkdownEditor` — no editor re-creation needed
+- **External control**: `Editor` accepts optional `locale` prop + `onLocaleChange` callback. If `locale` is not provided, `LocaleProvider` manages state internally
+- **Slash command items** are regenerated from `getSlashCommandItems(localeRef.current)` on each query, so titles/descriptions update immediately on locale change
+- **Search terms** always contain both English and Chinese terms, so slash search works in both languages regardless of display locale
+
+### 9. Locale Ref Pattern for Extensions
+
+Extensions that display UI text receive a mutable `localeRef`:
+
+```typescript
+// In the extension definition:
+addOptions() {
+  return { localeRef: null };
+}
+
+// In NodeView or plugin:
+const text = this.options.localeRef?.current.mathBlock.clickToAdd ?? "Click to add formula";
+```
+
+Extensions using `localeRef`: MathBlock, PlantUMLBlock, TabHandler.

@@ -33,14 +33,28 @@ Rich Text Mode (TipTap)  <->  Markdown String (tiptap-markdown)  <->  Source Mod
 
 | File | Purpose |
 |------|---------|
-| `src/lib/use-markdown-editor.ts` | Main hook that configures TipTap with all extensions |
-| `src/lib/slash-command-suggestion.tsx` | Slash command Suggestion API config with Tippy.js |
+| `src/lib/use-markdown-editor.ts` | Main hook that configures TipTap with all extensions; creates `localeRef` and passes it to extensions |
+| `src/lib/slash-command-suggestion.tsx` | `createSlashCommandSuggestion(localeRef)` factory; fuzzy match filtering on title + searchTerms |
 | `src/lib/word-segmentation.ts` | Intl.Segmenter-based word boundary detection for CJK |
-| `src/lib/link-utils.ts` | Functions for inserting Markdown link/image syntax |
-| `src/components/Editor/Editor.tsx` | Root component managing dual-view (rich text / source) |
+| `src/lib/link-utils.ts` | Functions for inserting Markdown link/image/video syntax |
+| `src/components/Editor/Editor.tsx` | Root component: wraps content with `LocaleProvider`, manages dual-view (rich text / source), renders `LanguageToggle` and `ViewToggle` in toolbar |
 | `src/components/Editor/SourceEditor.tsx` | CodeMirror 6 Markdown editor for source mode |
 | `src/components/Editor/ContextMenu/` | Right-click context menu (renders via portal) |
+| `src/components/Editor/LanguageToggle.tsx` | Button to toggle between English and Chinese |
+| `src/i18n/` | i18n system: types, en/zh dictionaries, `LocaleProvider` + `useLocale()` hook |
 | `src/extensions/index.ts` | Barrel export for all custom TipTap extensions |
+
+### i18n System
+
+The editor supports English (`en`) and Chinese (`zh`) via a simple dictionary + React Context + mutable ref pattern:
+
+- **`src/i18n/types.ts`**: `Locale`, `Dictionary`, `LocaleRef` types
+- **`src/i18n/en.ts` / `zh.ts`**: Full dictionary objects (~120 strings each)
+- **`src/i18n/context.tsx`**: `LocaleProvider` (controlled/uncontrolled), `useLocale()` hook returning `{ locale, setLocale, t }`
+
+**React components** use `useLocale()` to read the current dictionary. **TipTap extensions** (non-React) receive a mutable `localeRef: LocaleRef` via `.configure()` that React keeps in sync — no editor re-creation needed on language change.
+
+**External control**: The `Editor` component accepts optional `locale` and `onLocaleChange` props. If `locale` is not provided, state is managed internally with a toggle button.
 
 ### Extension Pattern
 
@@ -75,14 +89,14 @@ Extensions without standard Markdown syntax serialize as raw HTML with `html: tr
 | Node | Syntax | Description |
 |------|--------|-------------|
 | MathInline | `$...$` | KaTeX inline math, click converts to editable `$latex$` text, paste rule support |
-| MathBlock | `$$...$$` | KaTeX block math with collapsed/expanded NodeView toggle |
-| PlantUMLBlock | ` ```plantuml ` | PlantUML diagrams with collapsed/expanded NodeView toggle, encodes to plantuml.com SVG |
+| MathBlock | `$$...$$` | KaTeX block math with collapsed/expanded NodeView toggle; accepts `localeRef` for UI strings |
+| PlantUMLBlock | ` ```plantuml ` | PlantUML diagrams with collapsed/expanded NodeView toggle, encodes to plantuml.com SVG; accepts `localeRef` for UI strings |
 | Image | `![alt](url)` + raw HTML | Resizable image with InputRule, PasteRule, drag-and-drop, load fallback |
 | VideoBlock | `@[title](url)` | Resizable video with InputRule, PasteRule, load fallback |
-| SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
+| SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced); items generated from `getSlashCommandItems(t)` |
 | Highlight | `==...==` | Marker pen style highlighting |
 | TyporaMode | - | Shows heading markers when cursor inside heading |
-| TabHandler | - | Tab/Shift+Tab handling for code blocks, lists, and normal text |
+| TabHandler | - | Tab/Shift+Tab handling for code blocks, lists, and normal text; accepts `localeRef` for indent hint message |
 
 ### Collapsed/Expanded NodeView Pattern
 
@@ -113,10 +127,11 @@ MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
 
 ### UI Components
 
-- **ContextMenu**: Right-click menu with nested submenus (Format▸, Paragraph▸, Insert▸), rendered via `createPortal` to `document.body`
-- **SlashMenu**: Command palette triggered by `/`, positioned via Tippy.js, custom scrollbar with auto-scroll on keyboard navigation
-- **TableMenu**: Floating menu for table operations when cursor is in table
-- **ViewToggle**: Switches between rich text and source mode
+- **ContextMenu**: Right-click menu with nested submenus (Format, Paragraph, Insert), rendered via `createPortal` to `document.body`; labels from `t.contextMenu.*`
+- **SlashMenu**: Command palette triggered by `/`, positioned via Tippy.js, custom scrollbar with auto-scroll on keyboard navigation; group labels and "No results" text from `t.slashMenu.*`; fuzzy search matches both English and Chinese terms regardless of display language
+- **TableMenu**: Floating bubble menu for table operations when cursor is in table; labels from `t.tableMenu.*`
+- **ViewToggle**: Switches between rich text and source mode; title attributes from `t.viewToggle.*`
+- **LanguageToggle**: Button showing "EN" / "中" to switch locale; uses `useLocale()` to toggle
 
 ### Keyboard Shortcuts
 
@@ -137,8 +152,11 @@ MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
 
 - **Portal rendering**: ContextMenu uses `createPortal` to render outside ProseMirror DOM tree, preventing React/ProseMirror DOM conflicts that cause `insertBefore` errors
 - **TyporaMode safety**: The decorations callback is wrapped in try-catch, returning `DecorationSet.empty` on error (cosmetic failure only)
-- **Placeholder**: Uses TipTap Placeholder extension with per-node-type function for heading placeholders ("Heading 1", "Heading 2", etc.)
+- **Placeholder**: Uses TipTap Placeholder extension with per-node-type function; reads placeholder text from `localeRef.current.placeholder` for locale-aware headings (e.g. "Heading 1" / "标题 1")
 - **Link/Image/Video insertion**: Inserts plain Markdown syntax `[]()` / `![]()` / `@[]()` rather than using dialogs; InputRules auto-convert to rich nodes when user types closing `)`
 - **Media load fallback**: Image and VideoBlock NodeViews show `!`/`@` prefix with link when media fails to load
 - **MathInline editing**: Click on rendered math converts it back to editable `$latex$` text; InputRule re-renders when user finishes editing
 - **Context menu submenus**: Uses DOM traversal in `useLayoutEffect` to find trigger button and parent panel for positioning; flips horizontally/vertically when overflowing viewport
+- **Slash command search**: Uses `fuzzyMatch()` (subsequence matching) against both `title` and `searchTerms` array; searchTerms always contain both English and Chinese terms so search works in both languages regardless of display locale
+- **Locale ref pattern**: Extensions that display UI text (MathBlock, PlantUMLBlock, TabHandler) receive a `localeRef: LocaleRef` via `addOptions()` / `.configure()`. The ref is synced by `useEffect` in `useMarkdownEditor` — no editor re-creation needed
+- **Drag handle tooltip**: Uses `content: attr(data-tooltip)` in CSS with `data-tooltip` attribute set from `t.dragHandle.dragToMove` for locale-aware tooltip

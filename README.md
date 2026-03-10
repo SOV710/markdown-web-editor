@@ -6,6 +6,7 @@ A rich text editor with bidirectional Markdown conversion, built on TipTap 3 (Pr
 
 - **Dual-view editing**: Rich text mode with live formatting, or Markdown source mode (CodeMirror 6)
 - **Markdown round-trip**: Direct conversion between ProseMirror document model and Markdown via tiptap-markdown
+- **i18n**: English and Chinese support with runtime locale switching; slash menu fuzzy-searches both languages regardless of display locale
 - **Headings H1-H6**: Full heading level support
 - **Text formatting**: Bold, italic, underline, strikethrough, inline code, highlight (`==text==`)
 - **Lists**: Bullet lists, numbered lists, task lists with checkboxes
@@ -14,7 +15,7 @@ A rich text editor with bidirectional Markdown conversion, built on TipTap 3 (Pr
 - **Math formulas**: Inline `$...$` and block `$$...$$` with KaTeX rendering
 - **PlantUML diagrams**: Render UML diagrams via plantuml.com
 - **Resizable media**: Images and videos with drag-to-resize (10-100% width)
-- **Slash commands**: `/` triggered command palette for quick insertion
+- **Slash commands**: `/` triggered command palette for quick insertion with fuzzy search
 - **Live heading markers**: Typora-style heading syntax shown when cursor is inside headings
 - **Context menu**: Right-click menu with nested submenus for formatting, paragraph styles, inserting blocks, and clipboard operations
 
@@ -43,6 +44,17 @@ function App() {
 }
 ```
 
+### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `content` | `string` | Initial Markdown content |
+| `placeholder` | `string` | Placeholder text for empty editor |
+| `onUpdate` | `(markdown: string) => void` | Called with Markdown string on content change |
+| `locale` | `"en" \| "zh"` | Controlled locale (optional; manages state internally if omitted) |
+| `onLocaleChange` | `(locale: Locale) => void` | Called when locale changes |
+| `className` | `string` | Additional CSS class for the wrapper |
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -62,32 +74,42 @@ function App() {
 
 ```
 src/
-├── components/Editor/     # React components
-│   ├── Editor.tsx             # Main editor container
-│   ├── SourceEditor.tsx       # CodeMirror 6 source editor
-│   ├── ContextMenu/           # Right-click context menu
-│   ├── SlashMenu.tsx          # Slash command palette
-│   ├── TableMenu.tsx          # Table operations menu
-│   └── ViewToggle.tsx         # Rich/source view toggle
-├── extensions/            # TipTap extensions
-│   ├── math-inline.ts         # Inline math ($...$)
-│   ├── math-block.ts          # Block math ($$...$$)
-│   ├── plantuml-block.ts      # PlantUML diagrams
-│   ├── image.ts               # Resizable images
-│   ├── video-block.ts         # Resizable video player
-│   ├── highlight.ts           # Highlight mark (==...==)
-│   ├── typora-mode.ts         # Typora-style heading markers
-│   ├── tab-handler.ts         # Tab/Shift+Tab key handling
-│   ├── slash-command.tsx      # Slash command extension
+├── i18n/                     # Internationalization
+│   ├── types.ts                  # Locale, Dictionary, LocaleRef types
+│   ├── en.ts                     # English dictionary
+│   ├── zh.ts                     # Chinese dictionary
+│   ├── context.tsx               # LocaleProvider + useLocale() hook
+│   └── index.ts                  # Barrel export
+├── components/Editor/        # React components
+│   ├── Editor.tsx                # Main editor container (wraps with LocaleProvider)
+│   ├── SourceEditor.tsx          # CodeMirror 6 source editor
+│   ├── ContextMenu/              # Right-click context menu
+│   ├── SlashMenu.tsx             # Slash command palette
+│   ├── TableMenu.tsx             # Table operations menu
+│   ├── ViewToggle.tsx            # Rich/source view toggle
+│   ├── LanguageToggle.tsx        # EN/中 language toggle button
+│   └── ResizeHandle.tsx          # Resize handle component
+├── extensions/               # TipTap extensions
+│   ├── math-inline.ts            # Inline math ($...$)
+│   ├── math-block.ts             # Block math ($$...$$)
+│   ├── plantuml-block.ts         # PlantUML diagrams
+│   ├── image.ts                  # Resizable images
+│   ├── video-block.ts            # Resizable video player
+│   ├── highlight.ts              # Highlight mark (==...==)
+│   ├── typora-mode.ts            # Typora-style heading markers
+│   ├── tab-handler.ts            # Tab/Shift+Tab key handling
+│   ├── slash-command.tsx         # Slash command extension + items
 │   └── ...
-├── lib/                   # Hooks and utilities
-│   ├── use-markdown-editor.ts # Editor initialization hook
-│   ├── link-utils.ts          # Link/image insertion helpers
-│   └── word-segmentation.ts   # CJK word boundary detection
-└── styles/                # Global styles
-    ├── editor.css             # TipTap content styles
-    ├── hljs.css               # Code highlighting
-    └── katex.css              # Math formula styles
+├── lib/                      # Hooks and utilities
+│   ├── use-markdown-editor.ts    # Editor initialization hook
+│   ├── slash-command-suggestion.tsx # Suggestion config with fuzzy match
+│   ├── link-utils.ts             # Link/image/video insertion helpers
+│   └── word-segmentation.ts      # CJK word boundary detection
+└── styles/                   # Global styles
+    ├── reset.css                 # CSS variables and reset
+    ├── editor.css                # TipTap content styles
+    ├── hljs.css                  # Code highlighting
+    └── katex.css                 # Math formula styles
 ```
 
 ## Technology Stack

@@ -216,38 +216,39 @@ Component-level styles use CSS Modules (`*.module.css`).
 
 | File | Components |
 |------|------------|
-| `Editor.module.css` | Editor, Toolbar, TableMenu, DragHandle |
-| `ContextMenu.module.css` | ContextMenu |
-| `BubbleToolbar.module.css` | BubbleToolbar |
-| `SlashMenu.module.css` | SlashMenu |
+| `Editor.module.css` | Editor wrapper, Toolbar row, TableMenu, DragHandle (tooltip via `attr(data-tooltip)`) |
+| `ContextMenu.module.css` | ContextMenu panels and items |
+| `SlashMenu.module.css` | SlashMenu container, items, scrollbar |
 | `SourceEditor.module.css` | SourceEditor |
-| `ViewToggle.module.css` | ViewToggle |
+| `ViewToggle.module.css` | ViewToggle buttons |
+| `LanguageToggle.module.css` | LanguageToggle button |
 | `ResizeHandle.module.css` | ResizeHandle |
+| `BubbleToolbar.module.css` | (exists but not currently imported by any component) |
 
 ### Editor.module.css Main Classes
 
 | Class | Description |
 |-------|-------------|
 | `.wrapper` | Editor outer container, max-width: 800px, box-shadow |
-| `.toolbarRow` | Toolbar row, dark background (#1c1c1e) |
-| `.toolbar` | Toolbar container, flex wrap |
-| `.toolbarBtn` | Toolbar button, 32x32px, data-active state |
-| `.divider` | Separator, white 12% opacity |
+| `.toolbarRow` | Toolbar row, dark background, flex with gap |
 | `.editorArea` | Editor area, min-height: 400px |
 | `.tableMenu` | Table menu, dark glass effect |
 | `.tableMenuBtn` | Table menu button, gap: 4px |
-| `.dragHandle` | Drag handle, shows tooltip on hover |
+| `.tableMenuDivider` | Table menu divider, white 12% opacity |
+| `.dragHandle` | Drag handle, shows locale-aware tooltip on hover via `content: attr(data-tooltip)` |
 
 ### ContextMenu.module.css Main Classes
 
 | Class | Description |
 |-------|-------------|
 | `.panel` | Menu panel, dark glass effect, fixed position, min-width 220px |
+| `.submenuPanel` | Submenu panel, same style as panel |
 | `.item` | Menu item, flex layout with gap 8px |
 | `.itemCheck` | Checkmark gutter (16px width) |
 | `.itemLabel` | Item label, flex: 1 |
 | `.itemShortcut` | Keyboard shortcut display, monospace 11px |
-| `.itemArrow` | Submenu arrow indicator (▸) |
+| `.itemArrow` | Submenu arrow indicator |
+| `.itemIcon` | Icon container |
 | `.disabled` | Disabled item state, opacity 0.4 |
 | `.separator` | Menu separator line |
 | `.submenuWrapper` | Wrapper for submenu items, position: relative |

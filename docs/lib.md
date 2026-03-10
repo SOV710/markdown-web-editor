@@ -5,7 +5,7 @@ All utility functions are in `src/lib/`.
 ## Contents
 
 - [useMarkdownEditor](#usemarkdowneditor)
-- [slashCommandSuggestion](#slashcommandsuggestion)
+- [createSlashCommandSuggestion](#createslashcommandsuggestion)
 - [linkUtils](#linkutils)
 - [wordSegmentation](#wordsegmentation)
 
@@ -15,7 +15,7 @@ All utility functions are in `src/lib/`.
 
 **File**: `use-markdown-editor.ts`
 
-**Purpose**: React hook that initializes the TipTap editor
+**Purpose**: React hook that initializes the TipTap editor with all extensions and i18n support
 
 **Signature**:
 ```ts
@@ -31,24 +31,23 @@ interface UseMarkdownEditorOptions {
   placeholder?: string;
   /** Content update callback */
   onUpdate?: (markdown: string) => void;
+  /** Current locale */
+  locale?: Locale;
 }
 ```
 
-**Default Content**:
-```markdown
-## Welcome to the Editor
+**Default Content**: Locale-aware. If `content` is not provided, uses `dictionaries[locale].editor.defaultContent`.
 
-Start typing, or press `/` for commands…
-```
+**Default Placeholder**: Locale-aware. If `placeholder` is not provided, reads from `localeRef.current.placeholder.default`.
 
-**Default Placeholder**: `Type '/' for commands…`
+**Locale Ref**: Creates a `localeRef` (mutable ref to the current `Dictionary`) and syncs it via `useEffect` when `locale` changes. Passes `localeRef` to MathBlock, PlantUMLBlock, and TabHandler via `.configure()`.
 
 **Registered Extensions**:
 
 | Extension | Configuration |
 |-----------|---------------|
 | StarterKit | heading: { levels: [1,2,3,4,5,6] }, codeBlock: false |
-| Placeholder | Per-node-type placeholder function |
+| Placeholder | Per-node-type placeholder function reading from localeRef |
 | Markdown | html: true, transformPastedText: true, transformCopiedText: true |
 | CustomKeymap | - |
 | Underline | - |
@@ -57,13 +56,14 @@ Start typing, or press `/` for commands…
 | Image | - |
 | Table, TableRow, TableHeader, TableCell | - |
 | CodeBlockLowlight | - |
-| MathInline, MathBlock | - |
-| PlantUMLBlock | - |
+| MathInline | - |
+| MathBlock | localeRef |
+| PlantUMLBlock | localeRef |
 | VideoBlock | - |
 | Highlight | - |
 | TyporaMode | - |
-| TabHandler | - |
-| SlashCommand | suggestion: slashCommandSuggestion |
+| TabHandler | localeRef |
+| SlashCommand | suggestion: createSlashCommandSuggestion(localeRef) |
 
 **Placeholder Configuration**:
 ```ts
@@ -72,9 +72,10 @@ Placeholder.configure({
   showOnlyCurrent: true,
   placeholder: ({ node }) => {
     if (node.type.name === "heading") {
-      return `Heading ${node.attrs.level}`;
+      const t = localeRef.current;
+      return `${t.placeholder.heading} ${node.attrs.level}`;
     }
-    return placeholder;
+    return placeholder ?? localeRef.current.placeholder.default;
   },
 })
 ```
@@ -88,14 +89,6 @@ Placeholder.configure({
 }
 ```
 
-**onUpdate Callback**:
-```ts
-onUpdate: ({ editor }) => {
-  const storage = editor.storage as { markdown: MarkdownStorage };
-  onUpdate?.(storage.markdown.getMarkdown());
-}
-```
-
 **Usage**:
 ```tsx
 import { useMarkdownEditor } from "@/lib/use-markdown-editor";
@@ -103,6 +96,7 @@ import { useMarkdownEditor } from "@/lib/use-markdown-editor";
 function MyEditor() {
   const editor = useMarkdownEditor({
     content: "# Hello World",
+    locale: "en",
     onUpdate: (markdown) => console.log(markdown),
   });
 
@@ -114,45 +108,52 @@ function MyEditor() {
 
 ---
 
-## slashCommandSuggestion
+## createSlashCommandSuggestion
 
 **File**: `slash-command-suggestion.tsx`
 
-**Purpose**: Suggestion configuration for slash commands
+**Purpose**: Factory function that creates Suggestion configuration for slash commands with locale-aware items and fuzzy matching
 
-**Export**:
+**Signature**:
 ```ts
-const slashCommandSuggestion: Partial<SuggestionOptions<SlashCommandItem>>
+function createSlashCommandSuggestion(
+  localeRef: LocaleRef,
+): Partial<SuggestionOptions<SlashCommandItem>>
 ```
 
-### items
+### Items
 
-Filters command list based on query:
+Generates command list from `getSlashCommandItems(localeRef.current)` on each query, then filters with fuzzy matching:
+
 ```ts
 items: ({ query }) => {
-  return slashCommandItems.filter((item) =>
-    item.title.toLowerCase().startsWith(query.toLowerCase())
-  );
+  const items = getSlashCommandItems(localeRef.current);
+  if (!query) return items;
+  return items.filter((item) => {
+    if (fuzzyMatch(query, item.title)) return true;
+    return item.searchTerms.some((term) => fuzzyMatch(query, term));
+  });
 }
 ```
 
-### render
+### Fuzzy Match
 
-Renders menu using ReactRenderer + Tippy.js:
-
+Subsequence matching (case-insensitive):
 ```ts
-render: () => {
-  let component: ReactRenderer<SlashMenuRef> | null = null;
-  let popup: TippyInstance[] | null = null;
-
-  return {
-    onStart: (props) => { ... },
-    onUpdate: (props) => { ... },
-    onKeyDown: (props) => { ... },
-    onExit: () => { ... },
-  };
+function fuzzyMatch(query: string, text: string): boolean {
+  let qi = 0;
+  const q = query.toLowerCase();
+  const t = text.toLowerCase();
+  for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+    if (t[ti] === q[qi]) qi++;
+  }
+  return qi === q.length;
 }
 ```
+
+### Render
+
+Renders menu using ReactRenderer + Tippy.js.
 
 **Tippy Configuration**:
 | Option | Value |
@@ -176,7 +177,8 @@ render: () => {
 - `@tiptap/react` - ReactRenderer
 - `tippy.js` - Popup positioning
 - `@/components/Editor/SlashMenu` - Menu component
-- `@/extensions/slash-command` - Command list
+- `@/extensions/slash-command` - `getSlashCommandItems`, `SlashCommandItem`
+- `@/i18n` - `LocaleRef`
 
 ---
 
@@ -184,7 +186,7 @@ render: () => {
 
 **File**: `link-utils.ts`
 
-**Purpose**: Plain Markdown link and image insertion helpers
+**Purpose**: Plain Markdown link, image, and video insertion helpers
 
 ### insertMarkdownLink
 
@@ -199,14 +201,6 @@ function insertMarkdownLink(editor: Editor): void
 | No selection | Insert `[]()`, cursor inside `[]` |
 | Has selection | Wrap as `[selectedText]()`, cursor inside `()` |
 
-**Usage**:
-```ts
-import { insertMarkdownLink } from "@/lib/link-utils";
-
-// Via keyboard shortcut (Mod-k)
-insertMarkdownLink(editor);
-```
-
 ### insertMarkdownImage
 
 **Signature**:
@@ -220,14 +214,6 @@ function insertMarkdownImage(editor: Editor): void
 | No selection | Insert `![]()`, cursor inside `[]` for alt text |
 | Has selection | Use selection as alt text: `![selectedText]()`, cursor inside `()` |
 
-**Usage**:
-```ts
-import { insertMarkdownImage } from "@/lib/link-utils";
-
-// Via context menu
-insertMarkdownImage(editor);
-```
-
 ### insertMarkdownVideo
 
 **Signature**:
@@ -240,14 +226,6 @@ function insertMarkdownVideo(editor: Editor): void
 |-----------------|--------|
 | No selection | Insert `@[]()`, cursor inside `[]` for title |
 | Has selection | Use selection as title: `@[selectedText]()`, cursor inside `()` |
-
-**Usage**:
-```ts
-import { insertMarkdownVideo } from "@/lib/link-utils";
-
-// Via context menu or slash command
-insertMarkdownVideo(editor);
-```
 
 ---
 
