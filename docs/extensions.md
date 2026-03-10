@@ -18,6 +18,7 @@ All extensions are in `src/extensions/` and exported via `index.ts`.
 - [CustomKeymap](#customkeymap)
 - [Highlight](#highlight)
 - [TyporaMode](#typoramode)
+- [TabHandler](#tabhandler)
 
 ---
 
@@ -449,3 +450,26 @@ editor.chain().focus().toggleHighlight().run()
 
 **CSS Classes**:
 - `.live-md-heading-marker` - Heading marker styling
+
+---
+
+## TabHandler
+
+**File**: `tab-handler.ts`
+
+**Type**: Extension
+
+**Purpose**: Handles Tab and Shift+Tab key behavior across different block contexts
+
+**Behavior by context**:
+
+| Context | Tab | Shift+Tab |
+|---------|-----|-----------|
+| Table | Defers to TipTap table extension (next cell) | Defers to TipTap table extension (previous cell) |
+| Code block | Insert 4 spaces | Remove 4 leading spaces or 1 leading tab from current line |
+| List (bullet, ordered, task) | Sink list item (indent) | Lift list item (outdent) |
+| Normal text (paragraph, heading, etc.) | Insert 4 spaces | Remove 4 leading spaces or 1 leading tab from block start |
+
+**Indent limit hint**: When a list item cannot be indented further, displays a tooltip near the cursor ("Cannot indent further") that fades out after 1.5 seconds.
+
+**Implementation**: Uses a ProseMirror plugin (`handleKeyDown`) rather than TipTap `addKeyboardShortcuts` to always `preventDefault` on Tab before routing to the appropriate handler.

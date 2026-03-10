@@ -62,6 +62,7 @@ Start typing, or press `/` for commands…
 | VideoBlock | - |
 | Highlight | - |
 | TyporaMode | - |
+| TabHandler | - |
 | SlashCommand | suggestion: slashCommandSuggestion |
 
 **Placeholder Configuration**:

@@ -53,6 +53,8 @@ src/
 │   ├── task-list.ts         # Task lists
 │   ├── custom-keymap.ts     # Custom keyboard shortcuts
 │   ├── typora-mode.ts       # Typora-style heading markers
+│   ├── tab-handler.ts       # Tab/Shift+Tab key handling
+│   ├── math-utils.ts        # Shared math rendering utilities
 │   └── index.ts             # Barrel export
 ├── lib/                 # Utility functions
 │   ├── use-markdown-editor.ts       # Editor initialization hook

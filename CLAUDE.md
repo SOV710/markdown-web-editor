@@ -82,6 +82,7 @@ Extensions without standard Markdown syntax serialize as raw HTML with `html: tr
 | SlashCommand | `/` trigger | Command palette with groups (text/list/block/media/advanced) |
 | Highlight | `==...==` | Marker pen style highlighting |
 | TyporaMode | - | Shows heading markers when cursor inside heading |
+| TabHandler | - | Tab/Shift+Tab handling for code blocks, lists, and normal text |
 
 ### Collapsed/Expanded NodeView Pattern
 
@@ -129,6 +130,8 @@ MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
 | Ctrl+M | Toggle source/rich text view |
 | Ctrl+Alt+1-6 | Heading 1-6 |
 | Ctrl+Alt+0 | Paragraph |
+| Tab | Indent (4 spaces in code/text, sink list item, next table cell) |
+| Shift+Tab | Outdent (remove indent in code/text, lift list item, previous table cell) |
 
 ### Important Implementation Notes
 

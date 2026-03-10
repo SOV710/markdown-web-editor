@@ -55,6 +55,8 @@ function App() {
 | Ctrl+M | Toggle rich text / source view |
 | Ctrl+Alt+1-6 | Heading 1-6 |
 | Ctrl+Alt+0 | Paragraph |
+| Tab | Indent (4 spaces in code/text, sink list item) |
+| Shift+Tab | Outdent (remove indent in code/text, lift list item) |
 
 ## Project Structure
 
@@ -75,6 +77,7 @@ src/
 │   ├── video-block.ts         # Resizable video player
 │   ├── highlight.ts           # Highlight mark (==...==)
 │   ├── typora-mode.ts         # Typora-style heading markers
+│   ├── tab-handler.ts         # Tab/Shift+Tab key handling
 │   ├── slash-command.tsx      # Slash command extension
 │   └── ...
 ├── lib/                   # Hooks and utilities
