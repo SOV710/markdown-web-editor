@@ -44,7 +44,7 @@ export function useMarkdownEditor(options: UseMarkdownEditorOptions = {}) {
     content,
     placeholder,
     onUpdate,
-    locale = "en",
+    locale = "zh",
   } = options;
 
   const localeRef = useRef<LocaleRef["current"]>(dictionaries[locale]);

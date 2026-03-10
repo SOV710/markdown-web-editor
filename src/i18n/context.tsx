@@ -13,9 +13,9 @@ interface LocaleContextValue {
 }
 
 const LocaleContext = createContext<LocaleContextValue>({
-  locale: "en",
+  locale: "zh",
   setLocale: () => {},
-  t: en,
+  t: zh,
 });
 
 interface LocaleProviderProps {
@@ -25,7 +25,7 @@ interface LocaleProviderProps {
 }
 
 export function LocaleProvider({ locale: controlledLocale, onLocaleChange, children }: LocaleProviderProps) {
-  const [internalLocale, setInternalLocale] = useState<Locale>(controlledLocale ?? "en");
+  const [internalLocale, setInternalLocale] = useState<Locale>(controlledLocale ?? "zh");
 
   const isControlled = controlledLocale !== undefined;
   const locale = isControlled ? controlledLocale : internalLocale;
