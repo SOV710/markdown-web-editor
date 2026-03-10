@@ -308,15 +308,22 @@ export async function renderMarkdownForPdf(
     }
   }
 
-  return buildFullHtmlDocument(html);
+  // Extract first H1 text for PDF filename
+  const h1Match = html.match(/^<h1[^>]*>(.*?)<\/h1>/m);
+  const title = h1Match
+    ? h1Match[1]!.replace(/<[^>]*>/g, "").trim() || "Markdown Export"
+    : "Markdown Export";
+
+  return buildFullHtmlDocument(html, title);
 }
 
-function buildFullHtmlDocument(bodyHtml: string): string {
+function buildFullHtmlDocument(bodyHtml: string, title: string): string {
+  const escapedTitle = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>PDF Export</title>
+<title>${escapedTitle}</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.37/dist/katex.min.css">
 <style>
 ${PRINT_CSS}
@@ -334,7 +341,7 @@ const PRINT_CSS = `
 /* ── Page Setup ── */
 @page {
   size: A4;
-  margin: 20mm 18mm;
+  margin: 0;
 }
 
 /* ── Base ── */
@@ -346,6 +353,7 @@ body {
   line-height: 1.625;
   color: #1c1e21;
   background: #fff;
+  padding: 20mm 18mm;
 }
 
 .pdf-content {

@@ -7,16 +7,23 @@ export async function exportToPdf(
 ): Promise<void> {
   const html = await renderMarkdownForPdf(markdown, localeRef);
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    throw new Error("Failed to open print window. Please allow popups.");
+  // Use a hidden iframe instead of window.open to avoid visible blank page flash
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = "position:fixed;width:0;height:0;border:none;left:-9999px";
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc || !iframe.contentWindow) {
+    iframe.remove();
+    throw new Error("Failed to create print iframe.");
   }
 
-  printWindow.document.write(html);
-  printWindow.document.close();
+  iframeDoc.open();
+  iframeDoc.write(html);
+  iframeDoc.close();
 
   // Wait for all images to load before printing
-  const images = printWindow.document.querySelectorAll("img");
+  const images = iframeDoc.querySelectorAll("img");
   const imagePromises = Array.from(images).map(
     (img) =>
       new Promise<void>((resolve) => {
@@ -30,7 +37,7 @@ export async function exportToPdf(
   );
 
   // Also wait for KaTeX CSS to load
-  const links = printWindow.document.querySelectorAll('link[rel="stylesheet"]');
+  const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
   const linkPromises = Array.from(links).map(
     (link) =>
       new Promise<void>((resolve) => {
@@ -47,10 +54,11 @@ export async function exportToPdf(
   // Small delay to ensure rendering is complete
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  printWindow.print();
+  iframe.contentWindow.print();
 
-  // Close window after print dialog is dismissed
-  printWindow.addEventListener("afterprint", () => {
-    printWindow.close();
-  });
+  // Remove iframe after print dialog is dismissed
+  const cleanup = () => iframe.remove();
+  iframe.contentWindow.addEventListener("afterprint", cleanup);
+  // Timeout fallback in case afterprint doesn't fire
+  setTimeout(cleanup, 60000);
 }
