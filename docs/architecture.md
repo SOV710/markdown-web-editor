@@ -13,7 +13,7 @@
 │  (Editor, ContextMenu, TableMenu, ...) │
 ├─────────────────────────────────────────┤
 │             Library Layer              │  Utilities
-│  (useMarkdownEditor, linkUtils, ...)   │
+│  (useMarkdownEditor, exportPdf, ...)   │
 ├─────────────────────────────────────────┤
 │           Extensions Layer             │  TipTap extensions
 │  (Image, Table, MathBlock, ...)        │
@@ -156,7 +156,31 @@ No i18n framework. Simple dictionary + React Context + mutable ref:
 - **Slash command items** are regenerated from `getSlashCommandItems(localeRef.current)` on each query, so titles/descriptions update immediately on locale change
 - **Search terms** always contain both English and Chinese terms, so slash search works in both languages regardless of display locale
 
-### 9. Locale Ref Pattern for Extensions
+### 9. PDF Export
+
+PDF export is fully server-side. The frontend collects the markdown string and locale, then delegates all rendering to a separate backend service:
+
+```
+ExportButton (toolbar)
+    ↓
+exportToPdf(markdown, locale)     src/lib/export-pdf.ts
+    ↓
+POST ${PDF_API_URL}/api/pdf
+Content-Type: application/json
+{ markdown, locale }
+    ↓ (backend: markdown-it → HTML → Playwright page.pdf())
+← 200 OK
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="<title>.pdf"
+    ↓
+Blob URL → <a download> click → file saved
+```
+
+- `PDF_API_URL` is read from `VITE_PDF_API_URL` env var (empty = same origin).
+- Vite dev proxy maps `/api` → `http://localhost:3001` for local development.
+- Full API contract is in [`docs/pdf-api.md`](./pdf-api.md).
+
+### 10. Locale Ref Pattern for Extensions
 
 Extensions that display UI text receive a mutable `localeRef`:
 

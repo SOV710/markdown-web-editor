@@ -5,6 +5,7 @@ All components are in `src/components/Editor/`.
 ## Contents
 
 - [Editor](#editor)
+- [ExportButton](#exportbutton)
 - [ContextMenu](#contextmenu)
 - [TableMenu](#tablemenu)
 - [SlashMenu](#slashmenu)
@@ -54,6 +55,7 @@ Editor (wraps with LocaleProvider)
 └── EditorInner
     ├── toolbarRow
     │   ├── LanguageToggle
+    │   ├── ExportButton
     │   └── ViewToggle
     └── editorArea
         ├── EditorContent (richtext mode)
@@ -68,6 +70,37 @@ Editor (wraps with LocaleProvider)
 - `@tiptap/extension-drag-handle-react` - DragHandle
 - `@phosphor-icons/react` - DotsSixVertical icon
 - `@/i18n` - LocaleProvider, useLocale
+
+---
+
+## ExportButton
+
+**File**: `ExportButton.tsx`
+
+**Purpose**: PDF export button in the toolbar; sends markdown + locale to the backend PDF service and triggers a file download
+
+**Props**:
+```ts
+interface ExportButtonProps {
+  getMarkdown: (() => string) | null;
+  disabled?: boolean;
+}
+```
+
+**Behavior**:
+- Calls `getMarkdown()` to serialize the current TipTap document to Markdown
+- Calls `exportToPdf(markdown, locale)` — POSTs to the backend `/api/pdf` endpoint
+- Downloads the returned PDF blob via a temporary `<a download>` element
+- Shows loading state (`exporting`) while the request is in-flight
+- Disabled when: `getMarkdown` is null, `disabled` prop is true (source mode), or currently exporting
+
+**i18n**: Button `title` attribute reads from `t.exportButton.title` / `t.exportButton.exporting` via `useLocale()`
+
+**Icon**: `FilePdf` (Phosphor Icons, 16px)
+
+**Dependencies**:
+- `@/lib/export-pdf` - `exportToPdf`
+- `@/i18n` - `useLocale`
 
 ---
 

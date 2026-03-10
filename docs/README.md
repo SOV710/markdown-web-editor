@@ -9,6 +9,7 @@ Rich text editor built with TipTap 3.20.1 + React 19 + TypeScript 5.9.
 - [Components](./components.md)
 - [Library Utilities](./lib.md)
 - [Styling](./styles.md)
+- [PDF API Contract](./pdf-api.md)
 
 ## Technology Stack
 
@@ -38,6 +39,7 @@ src/
 │   └── index.ts                 # Barrel export
 ├── components/Editor/       # React components
 │   ├── Editor.tsx               # Main editor container
+│   ├── ExportButton.tsx         # PDF export button
 │   ├── ContextMenu/             # Right-click context menu
 │   ├── TableMenu.tsx            # Table operations menu
 │   ├── SlashMenu.tsx            # Slash command menu
@@ -66,6 +68,8 @@ src/
 ├── lib/                     # Utility functions
 │   ├── use-markdown-editor.ts       # Editor initialization hook
 │   ├── slash-command-suggestion.tsx  # Slash command Suggestion config
+│   ├── export-pdf.ts                # PDF export (fetch + blob download)
+│   ├── pdf-config.ts                # PDF_API_URL from VITE_PDF_API_URL
 │   ├── link-utils.ts                # Link/image/video insertion helpers
 │   └── word-segmentation.ts         # CJK word boundary detection
 ├── styles/                  # Global styles
@@ -104,4 +108,5 @@ pnpm lint     # ESLint check
 | Dual view | Rich text / Markdown source toggle (Ctrl+M) |
 | Heading markers | Typora-style heading syntax shown when cursor is inside headings |
 | Context menu | Right-click for formatting, insertion, and clipboard operations |
+| PDF export | One-click export to PDF via backend service; no print dialog |
 | i18n | English and Chinese with runtime toggle; slash menu fuzzy-searches both languages |

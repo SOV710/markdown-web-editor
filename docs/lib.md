@@ -6,6 +6,8 @@ All utility functions are in `src/lib/`.
 
 - [useMarkdownEditor](#usemarkdowneditor)
 - [createSlashCommandSuggestion](#createslashcommandsuggestion)
+- [exportToPdf](#exporttopdf)
+- [pdfConfig](#pdfconfig)
 - [linkUtils](#linkutils)
 - [wordSegmentation](#wordsegmentation)
 
@@ -182,7 +184,49 @@ Renders menu using ReactRenderer + Tippy.js.
 
 ---
 
-## linkUtils
+## exportToPdf
+
+**File**: `export-pdf.ts`
+
+**Purpose**: Sends markdown content to the backend PDF rendering service and triggers a browser file download
+
+**Signature**:
+```ts
+async function exportToPdf(markdown: string, locale: Locale): Promise<void>
+```
+
+**Flow**:
+1. POSTs `{ markdown, locale }` as JSON to `${PDF_API_URL}/api/pdf`
+2. On non-200 response, parses `{ error }` JSON and throws
+3. Reads the response body as a `Blob`
+4. Extracts filename from `Content-Disposition` header (falls back to `"Markdown Export.pdf"`)
+5. Creates a temporary object URL, clicks a hidden `<a download>` element, revokes the URL
+
+**Error handling**: Throws `Error` with the backend `error` message on HTTP error responses.
+
+**Dependencies**:
+- `@/lib/pdf-config` - `PDF_API_URL`
+- `@/i18n` - `Locale` type
+
+---
+
+## pdfConfig
+
+**File**: `pdf-config.ts`
+
+**Purpose**: Exports `PDF_API_URL` derived from the `VITE_PDF_API_URL` Vite environment variable
+
+```ts
+export const PDF_API_URL = import.meta.env.VITE_PDF_API_URL ?? "";
+```
+
+**Behavior**:
+- Empty string (`""`) → requests go to the same origin (works with Vite dev proxy and reverse proxy in prod)
+- Set `VITE_PDF_API_URL=https://pdf.example.com` for cross-origin deployment
+
+**Dev proxy**: `vite.config.ts` proxies `/api` → `http://localhost:3001` so that local development against a local backend requires no CORS configuration and no env var change.
+
+---
 
 **File**: `link-utils.ts`
 

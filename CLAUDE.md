@@ -37,12 +37,16 @@ Rich Text Mode (TipTap)  <->  Markdown String (tiptap-markdown)  <->  Source Mod
 | `src/lib/slash-command-suggestion.tsx` | `createSlashCommandSuggestion(localeRef)` factory; fuzzy match filtering on title + searchTerms |
 | `src/lib/word-segmentation.ts` | Intl.Segmenter-based word boundary detection for CJK |
 | `src/lib/link-utils.ts` | Functions for inserting Markdown link/image/video syntax |
-| `src/components/Editor/Editor.tsx` | Root component: wraps content with `LocaleProvider`, manages dual-view (rich text / source), renders `LanguageToggle` and `ViewToggle` in toolbar |
+| `src/lib/export-pdf.ts` | PDF export: `exportToPdf(markdown, locale)` — POST to `/api/pdf`, blob download |
+| `src/lib/pdf-config.ts` | `PDF_API_URL` from `VITE_PDF_API_URL` env var (empty = same origin) |
+| `src/components/Editor/Editor.tsx` | Root component: wraps content with `LocaleProvider`, manages dual-view (rich text / source), renders `LanguageToggle`, `ExportButton`, and `ViewToggle` in toolbar |
+| `src/components/Editor/ExportButton.tsx` | PDF export button; gets `locale` from `useLocale()`, calls `exportToPdf(markdown, locale)` |
 | `src/components/Editor/SourceEditor.tsx` | CodeMirror 6 Markdown editor for source mode |
 | `src/components/Editor/ContextMenu/` | Right-click context menu (renders via portal) |
 | `src/components/Editor/LanguageToggle.tsx` | Button to toggle between English and Chinese |
 | `src/i18n/` | i18n system: types, en/zh dictionaries, `LocaleProvider` + `useLocale()` hook |
 | `src/extensions/index.ts` | Barrel export for all custom TipTap extensions |
+| `docs/pdf-api.md` | API contract between frontend and backend PDF rendering service |
 
 ### i18n System
 
@@ -132,6 +136,7 @@ MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
 - **TableMenu**: Floating bubble menu for table operations when cursor is in table; labels from `t.tableMenu.*`
 - **ViewToggle**: Switches between rich text and source mode; title attributes from `t.viewToggle.*`
 - **LanguageToggle**: Button showing "EN" / "中" to switch locale; uses `useLocale()` to toggle
+- **ExportButton**: PDF export button in toolbar; disabled in source mode; gets `locale` from `useLocale()` and calls `exportToPdf(markdown, locale)`; title text from `t.exportButton.*`
 
 ### Keyboard Shortcuts
 
@@ -160,3 +165,20 @@ MathBlock and PlantUMLBlock use a collapsed/expanded toggle pattern:
 - **Slash command search**: Uses `fuzzyMatch()` (subsequence matching) against both `title` and `searchTerms` array; searchTerms always contain both English and Chinese terms so search works in both languages regardless of display locale
 - **Locale ref pattern**: Extensions that display UI text (MathBlock, PlantUMLBlock, TabHandler) receive a `localeRef: LocaleRef` via `addOptions()` / `.configure()`. The ref is synced by `useEffect` in `useMarkdownEditor` — no editor re-creation needed
 - **Drag handle tooltip**: Uses `content: attr(data-tooltip)` in CSS with `data-tooltip` attribute set from `t.dragHandle.dragToMove` for locale-aware tooltip
+
+### PDF Export Architecture
+
+PDF export is delegated entirely to a separate backend service. The frontend only sends markdown + locale and receives a PDF binary.
+
+```
+ExportButton (toolbar)
+  → exportToPdf(markdown, locale)        src/lib/export-pdf.ts
+  → POST ${PDF_API_URL}/api/pdf
+  ← PDF blob
+  → <a download> click
+```
+
+- **`PDF_API_URL`**: `src/lib/pdf-config.ts` reads `VITE_PDF_API_URL` env var. Empty string = same origin.
+- **Dev proxy**: `vite.config.ts` proxies `/api` to `http://localhost:3001` so local frontend can reach a local backend without CORS issues.
+- **API contract**: See `docs/pdf-api.md` for full request/response spec.
+- **ExportButton** is disabled in source mode (markdown must be serialized from TipTap doc).

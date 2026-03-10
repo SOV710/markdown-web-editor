@@ -6,6 +6,7 @@ A rich text editor with bidirectional Markdown conversion, built on TipTap 3 (Pr
 
 - **Dual-view editing**: Rich text mode with live formatting, or Markdown source mode (CodeMirror 6)
 - **Markdown round-trip**: Direct conversion between ProseMirror document model and Markdown via tiptap-markdown
+- **PDF export**: One-click export to PDF via a server-side rendering service (no print dialog)
 - **i18n**: English and Chinese support with runtime locale switching; slash menu fuzzy-searches both languages regardless of display locale
 - **Headings H1-H6**: Full heading level support
 - **Text formatting**: Bold, italic, underline, strikethrough, inline code, highlight (`==text==`)
@@ -28,6 +29,21 @@ pnpm build        # TypeScript check + production build
 pnpm preview      # Preview production build
 pnpm lint         # Run ESLint
 ```
+
+## PDF Export
+
+PDF export sends the markdown to a separate backend service (`POST /api/pdf`) and downloads the result directly — no print dialog.
+
+Configure the backend URL via environment variable:
+
+```bash
+# .env.local
+VITE_PDF_API_URL=https://pdf.example.com   # cross-origin deployment
+# or leave empty for same-origin / Vite proxy
+```
+
+In development, the Vite dev server proxies `/api` to `http://localhost:3001`. See [`docs/pdf-api.md`](./docs/pdf-api.md) for the full API contract.
+
 
 ## Usage
 
@@ -88,6 +104,7 @@ src/
 │   ├── TableMenu.tsx             # Table operations menu
 │   ├── ViewToggle.tsx            # Rich/source view toggle
 │   ├── LanguageToggle.tsx        # EN/中 language toggle button
+│   ├── ExportButton.tsx          # PDF export button
 │   └── ResizeHandle.tsx          # Resize handle component
 ├── extensions/               # TipTap extensions
 │   ├── math-inline.ts            # Inline math ($...$)
@@ -104,6 +121,8 @@ src/
 │   ├── use-markdown-editor.ts    # Editor initialization hook
 │   ├── slash-command-suggestion.tsx # Suggestion config with fuzzy match
 │   ├── link-utils.ts             # Link/image/video insertion helpers
+│   ├── export-pdf.ts             # PDF export (fetch + blob download)
+│   ├── pdf-config.ts             # PDF_API_URL from VITE_PDF_API_URL env var
 │   └── word-segmentation.ts      # CJK word boundary detection
 └── styles/                   # Global styles
     ├── reset.css                 # CSS variables and reset
@@ -134,6 +153,7 @@ See [`docs/`](./docs/) for detailed technical documentation:
 - [Components](./docs/components.md)
 - [Library Utilities](./docs/lib.md)
 - [Styling](./docs/styles.md)
+- [PDF API Contract](./docs/pdf-api.md)
 
 ## License
 
