@@ -3,6 +3,40 @@ import { createPortal } from "react-dom";
 import type { Editor } from "@tiptap/react";
 import { findWordAtPosition } from "@/lib/word-segmentation";
 import { insertMarkdownLink, insertMarkdownImage, insertMarkdownVideo } from "@/lib/link-utils";
+import {
+  Link as LinkIcon,
+  MagnifyingGlass,
+  TextB,
+  TextItalic,
+  TextStrikethrough,
+  Highlighter,
+  Code,
+  MathOperations,
+  Eraser,
+  ListBullets,
+  ListNumbers,
+  CheckSquare,
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  TextHFour,
+  TextHFive,
+  TextHSix,
+  Paragraph,
+  Quotes,
+  Image as ImageIcon,
+  VideoCamera,
+  Table,
+  Minus,
+  CodeBlock,
+  TreeStructure,
+  Scissors,
+  Copy,
+  ClipboardText,
+  CursorText,
+  TextAa,
+  PlusCircle,
+} from "@phosphor-icons/react";
 import styles from "./ContextMenu.module.css";
 
 export interface ContextMenuProps {
@@ -18,12 +52,13 @@ type MenuItemType =
   | {
       kind: "action";
       label: string;
+      icon?: React.ReactNode;
       shortcut?: string;
       action: () => void;
       disabled?: boolean;
       checked?: boolean;
     }
-  | { kind: "submenu"; label: string; children: MenuItemType[] }
+  | { kind: "submenu"; label: string; icon?: React.ReactNode; children: MenuItemType[] }
   | { kind: "separator" };
 
 interface MenuPanelProps {
@@ -187,6 +222,7 @@ function MenuPanel({ items, position, onClose, isSubmenu = false }: MenuPanelPro
                 onMouseEnter={() => handleMouseEnter(index)}
               >
                 <span className={styles.itemCheck}></span>
+                {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
                 <span className={styles.itemLabel}>{item.label}</span>
                 <span className={styles.itemArrow}>▸</span>
               </button>
@@ -214,6 +250,7 @@ function MenuPanel({ items, position, onClose, isSubmenu = false }: MenuPanelPro
             disabled={item.disabled}
           >
             <span className={styles.itemCheck}>{item.checked ? "✓" : ""}</span>
+            {item.icon && <span className={styles.itemIcon}>{item.icon}</span>}
             <span className={styles.itemLabel}>{item.label}</span>
             {item.shortcut && <span className={styles.itemShortcut}>{item.shortcut}</span>}
           </button>
@@ -395,60 +432,60 @@ export function ContextMenu({ editor }: ContextMenuProps) {
   const truncatedText = selectedText.length > 20 ? selectedText.slice(0, 20) + "…" : selectedText;
 
   const formatSubmenu: MenuItemType[] = [
-    { kind: "action", label: "Bold", shortcut: "Ctrl+B", action: createFormatAction(ed => ed.chain().focus().toggleBold()), checked: safeIsActive("bold") },
-    { kind: "action", label: "Italic", shortcut: "Ctrl+I", action: createFormatAction(ed => ed.chain().focus().toggleItalic()), checked: safeIsActive("italic") },
-    { kind: "action", label: "Strikethrough", shortcut: "Ctrl+Shift+S", action: createFormatAction(ed => ed.chain().focus().toggleStrike()), checked: safeIsActive("strike") },
-    { kind: "action", label: "Highlight", shortcut: "Ctrl+Shift+H", action: createFormatAction(ed => ed.chain().focus().toggleHighlight()), checked: safeIsActive("highlight") },
+    { kind: "action", label: "Bold", icon: <TextB size={16} />, shortcut: "Ctrl+B", action: createFormatAction(ed => ed.chain().focus().toggleBold()), checked: safeIsActive("bold") },
+    { kind: "action", label: "Italic", icon: <TextItalic size={16} />, shortcut: "Ctrl+I", action: createFormatAction(ed => ed.chain().focus().toggleItalic()), checked: safeIsActive("italic") },
+    { kind: "action", label: "Strikethrough", icon: <TextStrikethrough size={16} />, shortcut: "Ctrl+Shift+S", action: createFormatAction(ed => ed.chain().focus().toggleStrike()), checked: safeIsActive("strike") },
+    { kind: "action", label: "Highlight", icon: <Highlighter size={16} />, shortcut: "Ctrl+Shift+H", action: createFormatAction(ed => ed.chain().focus().toggleHighlight()), checked: safeIsActive("highlight") },
     { kind: "separator" },
-    { kind: "action", label: "Code", shortcut: "Ctrl+E", action: createFormatAction(ed => ed.chain().focus().toggleCode()), checked: safeIsActive("code") },
-    { kind: "action", label: "Math", action: wrapInMath, checked: false },
+    { kind: "action", label: "Code", icon: <Code size={16} />, shortcut: "Ctrl+E", action: createFormatAction(ed => ed.chain().focus().toggleCode()), checked: safeIsActive("code") },
+    { kind: "action", label: "Math", icon: <MathOperations size={16} />, action: wrapInMath, checked: false },
     { kind: "separator" },
-    { kind: "action", label: "Clear formatting", action: () => editor.chain().focus().unsetAllMarks().run() },
+    { kind: "action", label: "Clear formatting", icon: <Eraser size={16} />, action: () => editor.chain().focus().unsetAllMarks().run() },
   ];
 
   const paragraphSubmenu: MenuItemType[] = [
-    { kind: "action", label: "Bullet list", action: () => editor.chain().focus().toggleBulletList().run(), checked: safeIsActive("bulletList") },
-    { kind: "action", label: "Numbered list", action: () => editor.chain().focus().toggleOrderedList().run(), checked: safeIsActive("orderedList") },
-    { kind: "action", label: "Task list", action: () => editor.chain().focus().toggleTaskList().run(), checked: safeIsActive("taskList") },
+    { kind: "action", label: "Bullet list", icon: <ListBullets size={16} />, action: () => editor.chain().focus().toggleBulletList().run(), checked: safeIsActive("bulletList") },
+    { kind: "action", label: "Numbered list", icon: <ListNumbers size={16} />, action: () => editor.chain().focus().toggleOrderedList().run(), checked: safeIsActive("orderedList") },
+    { kind: "action", label: "Task list", icon: <CheckSquare size={16} />, action: () => editor.chain().focus().toggleTaskList().run(), checked: safeIsActive("taskList") },
     { kind: "separator" },
-    { kind: "action", label: "Heading 1", shortcut: "Ctrl+Alt+1", action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), checked: safeIsActive("heading", { level: 1 }) },
-    { kind: "action", label: "Heading 2", shortcut: "Ctrl+Alt+2", action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), checked: safeIsActive("heading", { level: 2 }) },
-    { kind: "action", label: "Heading 3", shortcut: "Ctrl+Alt+3", action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), checked: safeIsActive("heading", { level: 3 }) },
-    { kind: "action", label: "Heading 4", shortcut: "Ctrl+Alt+4", action: () => editor.chain().focus().toggleHeading({ level: 4 }).run(), checked: safeIsActive("heading", { level: 4 }) },
-    { kind: "action", label: "Heading 5", shortcut: "Ctrl+Alt+5", action: () => editor.chain().focus().toggleHeading({ level: 5 }).run(), checked: safeIsActive("heading", { level: 5 }) },
-    { kind: "action", label: "Heading 6", shortcut: "Ctrl+Alt+6", action: () => editor.chain().focus().toggleHeading({ level: 6 }).run(), checked: safeIsActive("heading", { level: 6 }) },
-    { kind: "action", label: "Body", shortcut: "Ctrl+Alt+0", action: () => editor.chain().focus().setParagraph().run(), checked: !safeIsActive("heading") },
+    { kind: "action", label: "Heading 1", icon: <TextHOne size={16} />, shortcut: "Ctrl+Alt+1", action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(), checked: safeIsActive("heading", { level: 1 }) },
+    { kind: "action", label: "Heading 2", icon: <TextHTwo size={16} />, shortcut: "Ctrl+Alt+2", action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(), checked: safeIsActive("heading", { level: 2 }) },
+    { kind: "action", label: "Heading 3", icon: <TextHThree size={16} />, shortcut: "Ctrl+Alt+3", action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(), checked: safeIsActive("heading", { level: 3 }) },
+    { kind: "action", label: "Heading 4", icon: <TextHFour size={16} />, shortcut: "Ctrl+Alt+4", action: () => editor.chain().focus().toggleHeading({ level: 4 }).run(), checked: safeIsActive("heading", { level: 4 }) },
+    { kind: "action", label: "Heading 5", icon: <TextHFive size={16} />, shortcut: "Ctrl+Alt+5", action: () => editor.chain().focus().toggleHeading({ level: 5 }).run(), checked: safeIsActive("heading", { level: 5 }) },
+    { kind: "action", label: "Heading 6", icon: <TextHSix size={16} />, shortcut: "Ctrl+Alt+6", action: () => editor.chain().focus().toggleHeading({ level: 6 }).run(), checked: safeIsActive("heading", { level: 6 }) },
+    { kind: "action", label: "Body", icon: <Paragraph size={16} />, shortcut: "Ctrl+Alt+0", action: () => editor.chain().focus().setParagraph().run(), checked: !safeIsActive("heading") },
     { kind: "separator" },
-    { kind: "action", label: "Quote", action: () => editor.chain().focus().toggleBlockquote().run(), checked: safeIsActive("blockquote") },
+    { kind: "action", label: "Quote", icon: <Quotes size={16} />, action: () => editor.chain().focus().toggleBlockquote().run(), checked: safeIsActive("blockquote") },
   ];
 
   const insertSubmenu: MenuItemType[] = [
-    { kind: "action", label: "Image", action: () => insertMarkdownImage(editor) },
-    { kind: "action", label: "Video", action: () => insertMarkdownVideo(editor) },
+    { kind: "action", label: "Image", icon: <ImageIcon size={16} />, action: () => insertMarkdownImage(editor) },
+    { kind: "action", label: "Video", icon: <VideoCamera size={16} />, action: () => insertMarkdownVideo(editor) },
     { kind: "separator" },
-    { kind: "action", label: "Table", action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
-    { kind: "action", label: "Horizontal rule", action: () => editor.chain().focus().setHorizontalRule().run() },
+    { kind: "action", label: "Table", icon: <Table size={16} />, action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run() },
+    { kind: "action", label: "Horizontal rule", icon: <Minus size={16} />, action: () => editor.chain().focus().setHorizontalRule().run() },
     { kind: "separator" },
-    { kind: "action", label: "Code block", action: () => editor.chain().focus().toggleCodeBlock().run() },
-    { kind: "action", label: "Math block", action: () => editor.chain().focus().setMathBlock({ latex: "" }).run() },
-    { kind: "action", label: "PlantUML block", action: () => editor.chain().focus().setPlantUMLBlock({ source: "@startuml\n\n@enduml" }).run() },
+    { kind: "action", label: "Code block", icon: <CodeBlock size={16} />, action: () => editor.chain().focus().toggleCodeBlock().run() },
+    { kind: "action", label: "Math block", icon: <MathOperations size={16} />, action: () => editor.chain().focus().setMathBlock({ latex: "" }).run() },
+    { kind: "action", label: "PlantUML block", icon: <TreeStructure size={16} />, action: () => editor.chain().focus().setPlantUMLBlock({ source: "@startuml\n\n@enduml" }).run() },
   ];
 
   const menuItems: MenuItemType[] = [
-    { kind: "action", label: "Add Link", shortcut: "Ctrl+K", action: () => insertMarkdownLink(editor) },
+    { kind: "action", label: "Add Link", icon: <LinkIcon size={16} />, shortcut: "Ctrl+K", action: () => insertMarkdownLink(editor) },
     { kind: "separator" },
     ...(hasSelection ? [
-      { kind: "action", label: `Search for "${truncatedText}"`, action: () => window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, "_blank") } as MenuItemType,
+      { kind: "action", label: `Search for "${truncatedText}"`, icon: <MagnifyingGlass size={16} />, action: () => window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, "_blank") } as MenuItemType,
     ] : []),
-    { kind: "submenu", label: "Format", children: formatSubmenu },
-    { kind: "submenu", label: "Paragraph", children: paragraphSubmenu },
-    { kind: "submenu", label: "Insert", children: insertSubmenu },
+    { kind: "submenu", label: "Format", icon: <TextAa size={16} />, children: formatSubmenu },
+    { kind: "submenu", label: "Paragraph", icon: <Paragraph size={16} />, children: paragraphSubmenu },
+    { kind: "submenu", label: "Insert", icon: <PlusCircle size={16} />, children: insertSubmenu },
     { kind: "separator" },
-    { kind: "action", label: "Cut", shortcut: "Ctrl+X", action: cutToClipboard, disabled: !hasSelection },
-    { kind: "action", label: "Copy", shortcut: "Ctrl+C", action: copyToClipboard, disabled: !hasSelection },
-    { kind: "action", label: "Paste", shortcut: "Ctrl+V", action: pasteFromClipboard },
-    { kind: "action", label: "Paste as plain text", shortcut: "Ctrl+Shift+V", action: pasteAsPlainText },
-    { kind: "action", label: "Select all", shortcut: "Ctrl+A", action: () => editor.chain().focus().selectAll().run() },
+    { kind: "action", label: "Cut", icon: <Scissors size={16} />, shortcut: "Ctrl+X", action: cutToClipboard, disabled: !hasSelection },
+    { kind: "action", label: "Copy", icon: <Copy size={16} />, shortcut: "Ctrl+C", action: copyToClipboard, disabled: !hasSelection },
+    { kind: "action", label: "Paste", icon: <ClipboardText size={16} />, shortcut: "Ctrl+V", action: pasteFromClipboard },
+    { kind: "action", label: "Paste as plain text", icon: <ClipboardText size={16} weight="light" />, shortcut: "Ctrl+Shift+V", action: pasteAsPlainText },
+    { kind: "action", label: "Select all", icon: <CursorText size={16} />, shortcut: "Ctrl+A", action: () => editor.chain().focus().selectAll().run() },
   ];
 
   return createPortal(
